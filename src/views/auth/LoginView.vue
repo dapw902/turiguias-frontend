@@ -29,7 +29,7 @@
               <input
                 id="password"
                 :type="showPassword ? 'text' : 'password'"
-                placeholder="••••••••"
+                placeholder="••••••••••••••"
                 class="input input-bordered w-full pr-10"
                 v-model="password"
                 required

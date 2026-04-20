@@ -6,12 +6,13 @@
 /* Añadimos colores corporativos */
 [data-theme='cupcake'] {
   --color-base-content: #3c3c3b;
-  --color-primary: #35b8bc;
+  --color-primary: #0b6b6b;
   --color-primary-2: #13c2c2;
   --color-secondary: #2eac66;
 }
 
 [data-theme='forest'] {
-  --color-primary: #35b8bc;
+  --color-primary: #0b6b6b;
+  --color-primary-2: #13c2c2;
   --color-secondary: #2eac66;
 }
