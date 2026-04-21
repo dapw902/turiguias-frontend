@@ -49,12 +49,19 @@ router.beforeEach((to, _from) => {
 
   // si la ruta es de admin y no es admin, redirigimos
   if (to.path.startsWith('/admin') && !authStore.isAdmin) {
-    return authStore.isAuthenticated ? '/guide/events' : '/login'
+    if (!authStore.isAuthenticated) return '/login'
+    const equivalentPath = to.path.replace('/admin', '/guide')
+    // verificamos si la ruta equivalente existe, si no, redirigimos a la vista por defecto
+    const routeExists = router.resolve(equivalentPath).matched.length > 0
+    return routeExists ? equivalentPath : '/guide/events'
   }
 
   // si la ruta es de guía y no es guía, redirigimos
   if (to.path.startsWith('/guide') && !authStore.isGuide) {
-    return authStore.isAuthenticated ? '/admin/events' : '/login'
+    if (!authStore.isAuthenticated) return '/login'
+    const equivalentPath = to.path.replace('/guide', '/admin')
+    const routeExists = router.resolve(equivalentPath).matched.length > 0
+    return routeExists ? equivalentPath : '/admin/events'
   }
 
   // si no está autenticado y no es login, redirigimos
