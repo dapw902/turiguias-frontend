@@ -13,18 +13,17 @@
             <img
               src="http://localhost:3000/uploads/photos/logo_prueba.png"
               alt="TuriGuías"
-              class="h-10 object-contain"
+              class="h-12 object-contain"
             />
             <h1 class="text-white text-lg font-bold">TuriGuías</h1>
           </div>
         </div>
         <!-- botón colapsar dentro del aside -->
-        <!-- botón colapsar dentro del aside -->
         <button
           class="btn btn-circle btn-sm bg-white/20 border-none text-white hover:bg-white/30 shadow-none"
           @click="sidebarOpen = !sidebarOpen"
         >
-          <CircleChevronLeft :size="20" />
+          <ChevronsLeft :size="20" />
         </button>
       </div>
 
@@ -88,19 +87,19 @@
     <!-- contenido principal -->
     <div class="flex flex-col flex-1 overflow-hidden">
       <!-- topbar -->
-      <header class="bg-base-200 px-4 py-5 flex items-center justify-between">
+      <header class="bg-base-200 px-4 py-6 flex items-center justify-between">
         <!-- botón abrir aside (solo visible cuando está cerrado) -->
         <button
           v-if="!sidebarOpen"
           class="btn btn-circle btn-sm bg-base-100 border-none shadow-sm"
           @click="sidebarOpen = !sidebarOpen"
         >
-          <CircleChevronRight :size="20" />
+          <ChevronsRight :size="20" />
         </button>
         <div v-else></div>
 
         <!-- título -->
-        <h2 class="text-xl font-medium" style="color: var(--color-primary)">Eventos</h2>
+        <h2 class="text-3xl font-medium">Eventos</h2>
 
         <!-- iconos mini-menu  -->
         <div class="flex items-center bg-base-100 rounded-full px-3 py-1 gap-2 shadow-sm">
@@ -136,14 +135,7 @@ import { useThemeStore } from '@/stores/theme'
 // para crear la variable reactiva para el aside colapsable
 import { ref } from 'vue'
 // para los iconos con Lucide
-import {
-  LogOut,
-  CircleChevronRight,
-  CircleChevronLeft,
-  Eclipse,
-  Sun,
-  UserCircle,
-} from '@lucide/vue'
+import { LogOut, ChevronsRight, ChevronsLeft, Eclipse, Sun, UserCircle } from '@lucide/vue'
 // para las redirecciones
 import { useRouter } from 'vue-router'
 

@@ -13,6 +13,13 @@
 
 [data-theme='forest'] {
   --color-primary: #0b6b6b;
-  --color-primary-2: #13c2c2;
-  --color-secondary: #2eac66;
+  --color-secondary: #13c2c2;
+}
+
+[data-theme='cupcake'] h2 {
+  color: var(--color-primary);
+}
+
+[data-theme='forest'] h2 {
+  color: var(--color-secondary);
 }

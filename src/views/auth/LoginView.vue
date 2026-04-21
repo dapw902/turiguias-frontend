@@ -9,30 +9,28 @@
         <!-- formulario de inicio de sesión -->
         <form @submit.prevent="handleLogin">
           <div class="form-control mb-3">
-            <label class="label" for="email">
+            <label class="label pb-2" for="email">
               <span class="label-text">Email</span>
             </label>
             <input
               id="email"
-              type="email"
+              type="text"
               placeholder="Correo electrónico"
-              class="input input-bordered w-full"
+              :class="['input w-full', error ? 'input-error' : 'input-secondary']"
               v-model="email"
-              required
             />
           </div>
           <div class="form-control mb-6">
-            <label class="label" for="password">
+            <label class="label pb-2" for="password">
               <span class="label-text">Contraseña</span>
             </label>
             <div class="relative">
               <input
                 id="password"
                 :type="showPassword ? 'text' : 'password'"
-                placeholder="••••••••••••••"
-                class="input input-bordered w-full pr-10"
+                placeholder="••••••••"
+                :class="['input w-full pr-10', error ? 'input-error' : 'input-secondary']"
                 v-model="password"
-                required
               />
               <button
                 type="button"
@@ -87,7 +85,21 @@ const showPassword = ref(false)
 // función para inicio de sesión (se ejecuta al hacer submit)
 async function handleLogin() {
   // limpiamos el error anterior
+  console.log('handleLogin llamado')
   error.value = ''
+
+  // validación manual para verificar que los inputs no estén vacíos
+  if (!email.value || !password.value) {
+    error.value = 'Completa todos los campos'
+    return
+  }
+
+  // validación básica de formato email
+  if (!email.value.includes('@')) {
+    error.value = 'Introduce un email válido'
+    return
+  }
+
   loading.value = true
   try {
     await authStore.login(email.value, password.value)
@@ -97,7 +109,8 @@ async function handleLogin() {
     } else {
       router.push('/guide/events')
     }
-  } catch {
+  } catch (e: unknown) {
+    console.log('Error:', e)
     error.value = 'Email o contraseña incorrectos'
   } finally {
     // siempre desactivamos el loading, haya error o no
