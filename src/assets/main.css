@@ -9,16 +9,18 @@
   --color-primary: #0b6b6b;
   --color-primary-2: #13c2c2;
   --color-secondary: #2eac66;
+  --color-gradient: linear-gradient(90deg, rgba(53, 184, 188, 1) 0%, rgba(49, 171, 102, 1) 100%);
 }
 
 [data-theme='forest'] {
   --color-primary: #0b6b6b;
   --color-secondary: #13c2c2;
   --color-extra: #3c3c3b;
+  --color-gradient: linear-gradient(90deg, rgba(53, 184, 188, 1) 0%, rgba(49, 171, 102, 1) 100%);
 }
 
+/* HEADERS*/
 /* Color personalizado para los headers H2 */
-
 [data-theme='cupcake'] h2 {
   color: var(--color-primary);
 }
@@ -27,6 +29,7 @@
   color: var(--color-secondary);
 }
 
+/* CALENDARIO*/
 /* Colores personalizados del calendario */
 
 [data-theme='forest'] .fc-day-today {
@@ -46,4 +49,18 @@
 
 [data-theme='cupcake'] .fc-col-header-cell {
   color: var(--color-primary);
+}
+
+/* BOTONES */
+/* Botones del calendario */
+.fc .fc-button-primary {
+  background: var(--color-gradient) !important;
+  border-color: var(--color-primary-2) !important;
+  color: white !important;
+}
+
+.btn-gradient {
+  background: var(--color-gradient) !important;
+  border: none !important;
+  color: white !important;
 }

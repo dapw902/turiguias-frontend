@@ -23,6 +23,11 @@ const router = createRouter({
           name: 'admin-events',
           component: () => import('@/views/admin/EventsView.vue'),
         },
+        {
+          path: 'events/:eventId/groups',
+          name: 'admin-event-groups',
+          component: () => import('@/views/admin/EventGroupsView.vue'),
+        },
       ],
     },
     {

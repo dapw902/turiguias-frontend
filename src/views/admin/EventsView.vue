@@ -12,8 +12,8 @@
 
     <!-- calendario -->
     <div v-else class="bg-base-100 rounded-xl p-4 shadow-sm">
-      <!-- filtro por servicio -->
-      <div class="mb-4 flex items-center gap-3">
+      <!-- filtros por servicio y por guías -->
+      <div class="mb-4 flex items-center gap-3 flex-wrap">
         <label class="text-sm font-medium" for="service-filter">Filtrar por servicio:</label>
         <select
           id="service-filter"
@@ -26,9 +26,24 @@
             {{ service.turitop_product_id }} — {{ service.name }}
           </option>
         </select>
+
+        <label class="text-sm font-medium" for="guide-filter">Guía:</label>
+        <select
+          id="guide-filter"
+          class="select select-sm select-bordered"
+          v-model="selectedGuideId"
+          @change="loadEvents()"
+        >
+          <option :value="null">Todos</option>
+          <option v-for="guide in guides" :key="guide.id" :value="guide.id">
+            {{ guide.name }}
+          </option>
+        </select>
       </div>
       <FullCalendar :options="calendarOptions" />
     </div>
+    <!-- modal de detalle del evento -->
+    <EventDetailModal :isOpen="modalOpen" :event="selectedEvent" @close="modalOpen = false" />
   </div>
 </template>
 
@@ -45,6 +60,10 @@ import type { EventClickArg, CalendarOptions, EventInput } from '@fullcalendar/c
 import { getEvents, type Event } from '@/api/events'
 // importamos la función y la interfaz de servicios
 import { getServices, type Service } from '@/api/services'
+// importamos el componente del modal
+import EventDetailModal from '@/components/EventDetailModal.vue'
+// importamos la función  y la interfaz de usuarios
+import { getGuides, type User } from '@/api/users'
 
 // EVENTOS Y CALENDARIO
 // estado de carga
@@ -69,10 +88,16 @@ function toCalendarEvent(event: Event): EventInput {
   }
 }
 
+// TARJETA EVENTO Y MODAL
+// controla si el modal está abiertos
+const modalOpen = ref(false)
+// evento seleccionado al hacer clic
+const selectedEvent = ref<Event | null>(null)
+
 // función que se ejecuta al hacer clic en un evento del calendario
 function handleEventClick(info: EventClickArg) {
-  const event = info.event.extendedProps['event'] as Event
-  console.log('Evento clickado:', event)
+  selectedEvent.value = info.event.extendedProps['event'] as Event
+  modalOpen.value = true
 }
 
 const calendarOptions = ref<CalendarOptions>({
@@ -99,6 +124,17 @@ async function loadServices() {
   services.value = await getServices()
 }
 
+// FILTRO POR GUÍAS
+// lista de guías para el filtro
+const guides = ref<User[]>([])
+// guía seleccionado para filtrar (null = todos)
+const selectedGuideId = ref<number | null>(null)
+
+// carga los guías para el filtro
+async function loadGuides() {
+  guides.value = await getGuides()
+}
+
 // CARGA EVENTOS BACKEND
 // función para cargar los eventos desde el backend
 async function loadEvents() {
@@ -109,6 +145,7 @@ async function loadEvents() {
       withBookings: true,
       limit: 100,
       serviceId: selectedServiceId.value ?? undefined,
+      guideId: selectedGuideId.value ?? undefined,
     })
     // actualizamos los eventos directamente en las opciones del calendario
     calendarOptions.value = {
@@ -124,6 +161,7 @@ async function loadEvents() {
 
 onMounted(() => {
   loadServices()
+  loadGuides()
   loadEvents()
 })
 </script>

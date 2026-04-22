@@ -10,7 +10,7 @@ export interface Service {
   active: boolean
 }
 
-// obtiene el listado de servicios
+// para obtener el listado de servicios
 export async function getServices() {
   const response = await api.get<{ data: Service[] }>('/services', {
     params: { limit: 100 },

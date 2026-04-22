@@ -6,6 +6,7 @@ export interface Event {
   id: number
   service: {
     id: number
+    turitop_product_id: string
     name: string
     duration: number
     timezone: string
@@ -26,7 +27,7 @@ export interface PaginatedEvents {
   totalPages: number
 }
 
-// obtiene el listado de eventos con filtros opcionales
+// pra obtener el listado de eventos con filtros opcionales
 export async function getEvents(params: {
   page?: number
   limit?: number
@@ -34,6 +35,7 @@ export async function getEvents(params: {
   startTimestamp?: number
   endTimestamp?: number
   withBookings?: boolean
+  guideId?: number
 }) {
   const response = await api.get<PaginatedEvents>('/events', { params })
   return response.data
