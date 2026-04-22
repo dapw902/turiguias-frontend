@@ -14,7 +14,10 @@
 [data-theme='forest'] {
   --color-primary: #0b6b6b;
   --color-secondary: #13c2c2;
+  --color-extra: #3c3c3b;
 }
+
+/* Color personalizado para los headers H2 */
 
 [data-theme='cupcake'] h2 {
   color: var(--color-primary);
@@ -22,4 +25,25 @@
 
 [data-theme='forest'] h2 {
   color: var(--color-secondary);
+}
+
+/* Colores personalizados del calendario */
+
+[data-theme='forest'] .fc-day-today {
+  background-color: color-mix(in srgb, var(--color-secondary) 15%, transparent) !important;
+}
+
+[data-theme='forest'] .fc-col-header,
+[data-theme='forest'] .fc-col-header-cell,
+[data-theme='forest'] .fc th {
+  background-color: var(--color-extra);
+  color: var(--color-secondary);
+}
+
+[data-theme='cupcake'] .fc-day-today {
+  background-color: color-mix(in srgb, var(--color-primary-2) 15%, transparent) !important;
+}
+
+[data-theme='cupcake'] .fc-col-header-cell {
+  color: var(--color-primary);
 }

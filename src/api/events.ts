@@ -33,6 +33,7 @@ export async function getEvents(params: {
   serviceId?: number
   startTimestamp?: number
   endTimestamp?: number
+  withBookings?: boolean
 }) {
   const response = await api.get<PaginatedEvents>('/events', { params })
   return response.data

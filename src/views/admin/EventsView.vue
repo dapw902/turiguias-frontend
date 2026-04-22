@@ -1,23 +1,33 @@
 <template>
   <div>
-    <!-- cabecera de la vista -->
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-medium">Eventos</h2>
-    </div>
-
     <!-- estado de carga -->
     <div v-if="loading" class="flex justify-center py-12">
       <span class="loading loading-spinner loading-lg" style="color: var(--color-primary)"></span>
     </div>
 
     <!-- mensaje de error -->
-    <div v-else-if="error" class="alert alert-error">
+    <div v-else-if="error" class="alert alert-error mb-4">
       {{ error }}
     </div>
 
-    <!-- lista de eventos -->
-    <div v-else>
-      <!-- aquí van las tarjetas -->
+    <!-- calendario -->
+    <div v-else class="bg-base-100 rounded-xl p-4 shadow-sm">
+      <!-- filtro por servicio -->
+      <div class="mb-4 flex items-center gap-3">
+        <label class="text-sm font-medium" for="service-filter">Filtrar por servicio:</label>
+        <select
+          id="service-filter"
+          class="select select-sm select-bordered"
+          v-model="selectedServiceId"
+          @change="loadEvents()"
+        >
+          <option :value="null">Todos los servicios</option>
+          <option v-for="service in services" :key="service.id" :value="service.id">
+            {{ service.turitop_product_id }} — {{ service.name }}
+          </option>
+        </select>
+      </div>
+      <FullCalendar :options="calendarOptions" />
     </div>
   </div>
 </template>
@@ -25,35 +35,85 @@
 <script setup lang="ts">
 // para crear variables reactivas y ejecutar código al montar el componente
 import { ref, onMounted } from 'vue'
+// importamos FullCalendar y los plugins necesarios
+import FullCalendar from '@fullcalendar/vue3'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
+import interactionPlugin from '@fullcalendar/interaction'
+import type { EventClickArg, CalendarOptions, EventInput } from '@fullcalendar/core'
 // importamos la función y las interfaces de la API de eventos
-import { getEvents, type Event, type PaginatedEvents } from '@/api/events'
+import { getEvents, type Event } from '@/api/events'
+// importamos la función y la interfaz de servicios
+import { getServices, type Service } from '@/api/services'
 
-// lista de eventos cargados
-const events = ref<Event[]>([])
+// EVENTOS Y CALENDARIO
 // estado de carga
 const loading = ref(false)
 // error si falla la carga
 const error = ref('')
-// datos de paginación
-const pagination = ref<Omit<PaginatedEvents, 'data'>>({
-  total: 0,
-  page: 1,
-  limit: 20,
-  totalPages: 0,
+
+// función para convertir un evento del backend al formato de FullCalendar
+function toCalendarEvent(event: Event): EventInput {
+  const start = new Date(event.event_time * 1000)
+  const end = new Date((event.event_time + event.duration * 60) * 1000)
+  const isPast = start < new Date()
+  return {
+    id: String(event.id),
+    title: `${event.service.name} · ${event.totalPax} pax`,
+    start,
+    end,
+    backgroundColor: isPast ? '#9ca3af' : event.status === 'open' ? '#2eac66' : '#ef4444',
+    borderColor: '#fff',
+    extendedProps: { event },
+    display: 'block',
+  }
+}
+
+// función que se ejecuta al hacer clic en un evento del calendario
+function handleEventClick(info: EventClickArg) {
+  const event = info.event.extendedProps['event'] as Event
+  console.log('Evento clickado:', event)
+}
+
+const calendarOptions = ref<CalendarOptions>({
+  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+  initialView: 'timeGridWeek',
+  locale: 'es',
+  headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,timeGridWeek,timeGridDay',
+  },
+  eventClick: handleEventClick,
+  height: 'auto',
 })
 
+// FILTRO POR SERVICIOS
+// lista de servicios para el filtro
+const services = ref<Service[]>([])
+// servicio seleccionado para filtrar (null = todos)
+const selectedServiceId = ref<number | null>(null)
+
+// carga los servicios para el filtro
+async function loadServices() {
+  services.value = await getServices()
+}
+
+// CARGA EVENTOS BACKEND
 // función para cargar los eventos desde el backend
 async function loadEvents() {
   loading.value = true
   error.value = ''
   try {
-    const result = await getEvents({ page: pagination.value.page, limit: pagination.value.limit })
-    events.value = result.data
-    pagination.value = {
-      total: result.total,
-      page: result.page,
-      limit: result.limit,
-      totalPages: result.totalPages,
+    const result = await getEvents({
+      withBookings: true,
+      limit: 100,
+      serviceId: selectedServiceId.value ?? undefined,
+    })
+    // actualizamos los eventos directamente en las opciones del calendario
+    calendarOptions.value = {
+      ...calendarOptions.value,
+      events: result.data.map(toCalendarEvent),
     }
   } catch {
     error.value = 'Error al cargar los eventos'
@@ -62,8 +122,8 @@ async function loadEvents() {
   }
 }
 
-// cargamos los eventos al montar la vista
 onMounted(() => {
+  loadServices()
   loadEvents()
 })
 </script>
