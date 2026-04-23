@@ -53,9 +53,15 @@
 
 /* BOTONES */
 /* Botones del calendario */
-.fc .fc-button-primary {
-  background: var(--color-gradient) !important;
-  border-color: var(--color-primary-2) !important;
+[data-theme='cupcake'] .fc .fc-button-primary {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+[data-theme='forest'] .fc .fc-button-primary {
+  background: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
   color: white !important;
 }
 

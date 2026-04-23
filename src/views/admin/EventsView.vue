@@ -10,46 +10,71 @@
       {{ error }}
     </div>
 
-    <!-- calendario -->
-    <div v-else class="bg-base-100 rounded-xl p-4 shadow-sm">
+    <!-- calendario (siempre montado) -->
+    <div class="bg-base-100 rounded-xl p-4 shadow-sm relative">
+      <!-- tabs de timezone (solo si hay más de una) -->
+      <div v-if="timezones.length > 1" class="flex gap-2 mb-4">
+        <button
+          class="btn btn-sm"
+          :class="activeTimezone === null ? 'btn-gradient' : 'btn-outline'"
+          @click="selectAllTimezones()"
+        >
+          Todas
+        </button>
+        <button
+          v-for="tz in timezones"
+          :key="tz"
+          class="btn btn-sm"
+          :class="activeTimezone === tz ? 'btn-gradient' : 'btn-outline'"
+          @click="selectTimezone(tz)"
+        >
+          {{ tz }}
+        </button>
+      </div>
+
       <!-- filtros por servicio y por guías -->
       <div class="mb-4 flex items-center gap-3 flex-wrap">
         <label class="text-sm font-medium" for="service-filter">Filtrar por servicio:</label>
-        <select
-          id="service-filter"
-          class="select select-sm select-bordered"
+        <VueSelect
           v-model="selectedServiceId"
-          @change="loadEvents()"
+          :options="filteredServices"
+          :reduce="(s: Service) => s.id"
+          label="name"
+          placeholder="Todos los servicios"
+          @update:modelValue="loadEvents()"
+          class="w-64"
         >
-          <option :value="null">Todos los servicios</option>
-          <option v-for="service in services" :key="service.id" :value="service.id">
-            {{ service.turitop_product_id }} — {{ service.name }}
-          </option>
-        </select>
+          <template #option="{ turitop_product_id, name }">
+            {{ turitop_product_id }} — {{ name }}
+          </template>
+          <template #no-options> No se encontraron resultados </template>
+        </VueSelect>
 
         <label class="text-sm font-medium" for="guide-filter">Guía:</label>
-        <select
-          id="guide-filter"
-          class="select select-sm select-bordered"
+        <VueSelect
           v-model="selectedGuideId"
-          @change="loadEvents()"
+          :options="guides"
+          :reduce="(g: User) => g.id"
+          label="name"
+          placeholder="Todos los guías"
+          @update:modelValue="loadEvents()"
+          class="w-48"
         >
-          <option :value="null">Todos</option>
-          <option v-for="guide in guides" :key="guide.id" :value="guide.id">
-            {{ guide.name }}
-          </option>
-        </select>
+          <template #no-options> No se encontraron resultados </template>
+        </VueSelect>
       </div>
-      <FullCalendar :options="calendarOptions" />
+      <FullCalendar ref="calendar" :options="calendarOptions" />
     </div>
+
     <!-- modal de detalle del evento -->
     <EventDetailModal :isOpen="modalOpen" :event="selectedEvent" @close="modalOpen = false" />
   </div>
 </template>
 
 <script setup lang="ts">
-// para crear variables reactivas y ejecutar código al montar el componente
-import { ref, onMounted } from 'vue'
+// para crear variables reactivas, valores calculados y ejecutar código al montar el componente
+// referencia al componente FullCalendar para acceder a su API
+import { ref, onMounted, computed, useTemplateRef } from 'vue'
 // importamos FullCalendar y los plugins necesarios
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -62,8 +87,22 @@ import { getEvents, type Event } from '@/api/events'
 import { getServices, type Service } from '@/api/services'
 // importamos el componente del modal
 import EventDetailModal from '@/components/EventDetailModal.vue'
-// importamos la función  y la interfaz de usuarios
+// importamos la función y la interfaz de usuarios
 import { getGuides, type User } from '@/api/users'
+// para conversión de UTC a hora local
+import { DateTime } from 'luxon'
+
+const calendarRef = useTemplateRef<InstanceType<typeof FullCalendar>>('calendar')
+
+// TIMEZONES
+// timezones únicas detectadas en los servicios
+const timezones = computed(() => {
+  const unique = [...new Set(services.value.map((s) => s.timezone))]
+  return unique
+})
+
+// timezone activa (pestaña seleccionada)
+const activeTimezone = ref<string | null>(null)
 
 // EVENTOS Y CALENDARIO
 // estado de carga
@@ -73,14 +112,12 @@ const error = ref('')
 
 // función para convertir un evento del backend al formato de FullCalendar
 function toCalendarEvent(event: Event): EventInput {
-  const start = new Date(event.event_time * 1000)
-  const end = new Date((event.event_time + event.duration * 60) * 1000)
-  const isPast = start < new Date()
+  const isPast = new Date(event.event_time * 1000) < new Date()
   return {
     id: String(event.id),
     title: `${event.service.name} · ${event.totalPax} pax`,
-    start,
-    end,
+    start: toLocalDateString(event.event_time, event.service.timezone),
+    end: toLocalDateString(event.event_time + event.duration * 60, event.service.timezone),
     backgroundColor: isPast ? '#9ca3af' : event.status === 'open' ? '#2eac66' : '#ef4444',
     borderColor: '#fff',
     extendedProps: { event },
@@ -89,7 +126,7 @@ function toCalendarEvent(event: Event): EventInput {
 }
 
 // TARJETA EVENTO Y MODAL
-// controla si el modal está abiertos
+// controla si el modal está abierto
 const modalOpen = ref(false)
 // evento seleccionado al hacer clic
 const selectedEvent = ref<Event | null>(null)
@@ -111,6 +148,7 @@ const calendarOptions = ref<CalendarOptions>({
   },
   eventClick: handleEventClick,
   height: 'auto',
+  timeZone: 'UTC',
 })
 
 // FILTRO POR SERVICIOS
@@ -119,9 +157,18 @@ const services = ref<Service[]>([])
 // servicio seleccionado para filtrar (null = todos)
 const selectedServiceId = ref<number | null>(null)
 
-// carga los servicios para el filtro
+// servicios filtrados según la timezone activa
+const filteredServices = computed(() => {
+  if (!activeTimezone.value) return services.value
+  return services.value.filter((s) => s.timezone === activeTimezone.value)
+})
+
 async function loadServices() {
   services.value = await getServices()
+  // seleccionamos la primera timezone por defecto
+  if (timezones.value.length > 0) {
+    activeTimezone.value = timezones.value[0] ?? null
+  }
 }
 
 // FILTRO POR GUÍAS
@@ -136,6 +183,10 @@ async function loadGuides() {
 }
 
 // CARGA EVENTOS BACKEND
+
+// indica si es la primera carga (para no intentar usar calendarApi antes de que esté montado)
+const initialLoad = ref(true)
+
 // función para cargar los eventos desde el backend
 async function loadEvents() {
   loading.value = true
@@ -147,10 +198,24 @@ async function loadEvents() {
       serviceId: selectedServiceId.value ?? undefined,
       guideId: selectedGuideId.value ?? undefined,
     })
-    // actualizamos los eventos directamente en las opciones del calendario
-    calendarOptions.value = {
-      ...calendarOptions.value,
-      events: result.data.map(toCalendarEvent),
+    // filtramos por timezone activa en el frontend
+    const filtered = activeTimezone.value
+      ? result.data.filter((e) => e.service.timezone === activeTimezone.value)
+      : result.data
+    if (initialLoad.value) {
+      // primera carga: pasamos los eventos via opciones
+      calendarOptions.value = {
+        ...calendarOptions.value,
+        events: filtered.map(toCalendarEvent),
+      }
+      initialLoad.value = false
+    } else {
+      // cargas siguientes: actualizamos sin reiniciar el calendario
+      const calendarApi = calendarRef.value?.getApi()
+      if (calendarApi) {
+        calendarApi.removeAllEvents()
+        calendarApi.addEventSource(filtered.map(toCalendarEvent))
+      }
     }
   } catch {
     error.value = 'Error al cargar los eventos'
@@ -159,9 +224,30 @@ async function loadEvents() {
   }
 }
 
-onMounted(() => {
-  loadServices()
-  loadGuides()
+// HELPERS
+
+// convierte un timestamp UTC a una fecha/hora legible en la timezone indicada
+function toLocalDateString(timestamp: number, timezone: string): string {
+  return DateTime.fromSeconds(timestamp).setZone(timezone).toFormat('yyyy-MM-dd HH:mm:ss')
+}
+
+// selecciona todas las timezones y resetea el filtro de servicio
+function selectAllTimezones() {
+  activeTimezone.value = null
+  selectedServiceId.value = null
+  loadEvents()
+}
+
+// selecciona una timezone específica y resetea el filtro de servicio
+function selectTimezone(tz: string) {
+  activeTimezone.value = tz
+  selectedServiceId.value = null
+  loadEvents()
+}
+
+onMounted(async () => {
+  await loadServices()
+  await loadGuides()
   loadEvents()
 })
 </script>

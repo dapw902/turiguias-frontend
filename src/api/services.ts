@@ -7,6 +7,7 @@ export interface Service {
   turitop_product_id: string
   name: string
   duration: number
+  timezone: string
   active: boolean
 }
 
