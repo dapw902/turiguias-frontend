@@ -99,7 +99,7 @@
         <div v-else></div>
 
         <!-- título -->
-        <h2 class="text-3xl font-medium">Eventos</h2>
+        <h2 class="text-3xl font-medium">{{ pageTitle }}</h2>
 
         <!-- iconos mini-menu  -->
         <div class="flex items-center bg-base-100 rounded-full px-3 py-1 gap-2 shadow-sm">
@@ -133,11 +133,11 @@ import { useAuthStore } from '@/stores/auth'
 // importamos el store del tema
 import { useThemeStore } from '@/stores/theme'
 // para crear la variable reactiva para el aside colapsable
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 // para los iconos con Lucide
 import { LogOut, ChevronsRight, ChevronsLeft, Eclipse, Sun, UserCircle } from '@lucide/vue'
-// para las redirecciones
-import { useRouter } from 'vue-router'
+// para las redirecciones y títulos de las páginas
+import { useRouter, useRoute } from 'vue-router'
 
 const sidebarOpen = ref(true)
 
@@ -146,4 +146,16 @@ const authStore = useAuthStore()
 const themeStore = useThemeStore()
 
 const router = useRouter()
+
+const route = useRoute()
+
+// título dinámico según la ruta activa
+const pageTitle = computed(() => {
+  if (route.path.includes('/events') && route.path.includes('/groups')) return 'Grupos'
+  if (route.path.includes('/events')) return 'Eventos'
+  if (route.path.includes('/guides')) return 'Guías'
+  if (route.path.includes('/services')) return 'Servicios'
+  if (route.path.includes('/users')) return 'Usuarios'
+  return ''
+})
 </script>
