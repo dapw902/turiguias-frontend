@@ -1,5 +1,8 @@
 <template>
-  <div class="bg-base-200 rounded-lg p-3 text-sm">
+  <div
+    class="bg-base-200 rounded-lg p-3 text-sm"
+    :class="{ 'cursor-grab active:cursor-grabbing': draggable }"
+  >
     <!-- campos obligatorios -->
     <div class="flex items-center justify-between mb-1">
       <p class="font-bold">{{ booking.turitop_booking_id }}</p>
@@ -48,6 +51,7 @@ import type { Booking } from '@/api/bookings'
 
 const props = defineProps<{
   booking: Booking
+  draggable?: boolean
 }>()
 
 // colores para el estado: verde para confirmed y paid, amarillo para el resto

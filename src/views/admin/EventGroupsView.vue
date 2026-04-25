@@ -47,45 +47,126 @@
           <div class="flex items-start justify-between mb-3">
             <div>
               <p class="font-bold text-sm">Grupo {{ group.id }}</p>
-              <p class="text-xs text-base-content/60">
-                Guía: {{ group.user?.name ?? 'Sin asignar' }}
-              </p>
+              <div
+                v-if="group.confirmed"
+                class="tooltip tooltip-right w-full"
+                data-tip="Desmarca 'Confirmado' para cambiar el guía"
+              >
+                <select
+                  class="select select-sm w-full max-w-44 mt-1 disabled:opacity-100 disabled:text-base-content"
+                  :value="group.user?.id ?? ''"
+                  :disabled="true"
+                >
+                  <option value="">Sin asignar</option>
+                  <option
+                    v-for="guide in availableGuides"
+                    :key="guide.guide_id"
+                    :value="guide.guide_id"
+                  >
+                    {{ guide.guide_name }}
+                  </option>
+                </select>
+              </div>
+              <select
+                v-else
+                class="select select-sm w-full max-w-44 mt-1"
+                :value="group.user?.id ?? ''"
+                @change="
+                  handleAssignGuide(
+                    group.id,
+                    ($event.target as HTMLSelectElement).value === ''
+                      ? null
+                      : parseInt(($event.target as HTMLSelectElement).value),
+                  )
+                "
+              >
+                <option value="">Sin asignar</option>
+                <option
+                  v-for="guide in availableGuides"
+                  :key="guide.guide_id"
+                  :value="guide.guide_id"
+                >
+                  {{ guide.guide_name }}
+                </option>
+              </select>
             </div>
-            <!-- checkbox confirmed -->
-            <label class="flex items-center gap-1 cursor-pointer">
-              <input
-                type="checkbox"
-                class="checkbox checkbox-sm"
-                :checked="group.confirmed"
-                @change="handleToggleConfirmed(group)"
-              />
-              <span class="text-xs">Confirmado</span>
-            </label>
+            <div class="flex items-center gap-2">
+              <!-- checkbox confirmed -->
+              <label class="flex items-center gap-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="checkbox checkbox-sm"
+                  :checked="group.confirmed"
+                  @change="handleToggleConfirmed(group)"
+                />
+                <span class="text-xs">Confirmado</span>
+              </label>
+              <!-- botón borrado. Grayed out si está confirmado, activo si no -->
+              <div
+                v-if="group.confirmed"
+                class="tooltip tooltip-bottom"
+                data-tip="Desmarca 'Confirmado' antes de borrar"
+              >
+                <button class="btn btn-ghost btn-xs text-base-content/30 cursor-not-allowed">
+                  <Trash2 :size="14" />
+                </button>
+              </div>
+              <button
+                v-else
+                class="btn btn-ghost btn-xs text-error hover:bg-error/10"
+                :disabled="deletingGroupId === group.id"
+                @click="handleDeleteGroup(group.id)"
+              >
+                <span
+                  v-if="deletingGroupId === group.id"
+                  class="loading loading-spinner loading-xs"
+                ></span>
+                <Trash2 v-else :size="14" />
+              </button>
+            </div>
           </div>
 
           <!-- reservas del grupo -->
-          <div class="flex flex-col gap-2">
-            <BookingCard
-              v-for="booking in bookings.filter((b) => b.group?.id === group.id)"
-              :key="booking.id"
-              :booking="booking"
-            />
-          </div>
+          <draggable
+            :list="bookingsByGroup[group.id]"
+            group="bookings"
+            item-key="id"
+            class="flex flex-col gap-2 min-h-10"
+            ghost-class="opacity-30"
+            :data-group-id="group.id"
+            @end="handleDragEnd"
+          >
+            <template #item="{ element }">
+              <BookingCard :booking="element" :draggable="true" :data-booking-id="element.id" />
+            </template>
+          </draggable>
         </div>
 
-        <!-- columna de reservas sueltas -->
-        <div
-          v-if="ungroupedBookings.length > 0"
-          class="bg-base-100 rounded-xl p-4 shadow-sm min-w-72 w-72 flex-shrink-0"
-        >
+        <!-- columna de reservas sueltas — siempre visible para poder soltar aquí -->
+        <div class="bg-base-100 rounded-xl p-4 shadow-sm min-w-72 w-72 flex-shrink-0">
           <p class="font-bold text-sm mb-3">Sin grupo ({{ ungroupedBookings.length }})</p>
-          <div class="flex flex-col gap-2">
-            <BookingCard
-              v-for="booking in ungroupedBookings"
-              :key="booking.id"
-              :booking="booking"
-            />
-          </div>
+          <draggable
+            :list="ungroupedBookings"
+            group="bookings"
+            item-key="id"
+            class="flex flex-col gap-2 min-h-10"
+            ghost-class="opacity-30"
+            data-group-id="0"
+            @end="handleDragEnd"
+          >
+            <template #item="{ element }">
+              <BookingCard :booking="element" :draggable="true" :data-booking-id="element.id" />
+            </template>
+            <!-- placeholder cuando no hay reservas sueltas -->
+            <template #footer>
+              <div
+                v-if="ungroupedBookings.length === 0"
+                class="text-xs text-base-content/40 text-center py-4 border-2 border-dashed border-base-300 rounded-lg"
+              >
+                Arrastra aquí para desasignar
+              </div>
+            </template>
+          </draggable>
         </div>
       </div>
     </div>
@@ -99,11 +180,25 @@ import { useRoute } from 'vue-router'
 // importamos las funciones e interfaces necesarias
 import { getEventById, type Event } from '@/api/events'
 import { getBookingsByEvent, type Booking } from '@/api/bookings'
-import { getGroupsByEvent, generateGroups, saveGroups, type Group } from '@/api/groups'
+import {
+  getGroupsByEvent,
+  generateGroups,
+  saveGroups,
+  assignBookingToGroup,
+  deleteGroups,
+  getAvailableGuidesForEvent,
+  assignGuide,
+  type Group,
+  type AvailableGuide,
+} from '@/api/groups'
 // para conversión de UTC a hora local
 import { DateTime } from 'luxon'
 // para el formato de las tarjetas de las reservas
 import BookingCard from '@/components/BookingCard.vue'
+// para el drag and drop
+import draggable from 'vuedraggable'
+// icono
+import { Trash2 } from '@lucide/vue'
 
 const route = useRoute()
 // leemos el eventId de la URL (/admin/events/:eventId/groups)
@@ -115,23 +210,26 @@ const groups = ref<Group[]>([])
 const bookings = ref<Booking[]>([])
 const loading = ref(false)
 const error = ref('')
+
+// guías disponibles para este evento
+const availableGuides = ref<AvailableGuide[]>([])
+
 // de las reservas activas únicamente
 const totalPax = computed(() =>
   bookings.value.filter((b) => b.status !== 'deleted').reduce((sum, b) => sum + b.pax, 0),
 )
-
-// reservas sin grupo asignado
-const ungroupedBookings = computed(() =>
-  bookings.value.filter((b) => b.group === null && b.status !== 'deleted'),
-)
+// reservas sin grupo asignado — ref para que el Draggable pueda modificarlo
+const ungroupedBookings = ref<Booking[]>([])
+// reservas agrupadas por group.id — ref para que el Draggable pueda modificarlo
+const bookingsByGroup = ref<Record<number, Booking[]>>({})
 
 // HELPERS
 // para formatear el título del evento: "08:00 - Excursión Teide"
 function formatEventTitle(event: Event): string {
-  const time = DateTime.fromSeconds(event.event_time)
-    .setZone(event.service.timezone)
-    .toFormat('HH:mm')
-  return `${time} - ${event.service.name}`
+  const dt = DateTime.fromSeconds(event.event_time).setZone(event.service.timezone)
+  const time = dt.toFormat('HH:mm')
+  const date = dt.toFormat('dd/MM/yyyy')
+  return `${date} - ${time} - ${event.service.name}`
 }
 
 // CARGA DE DATOS
@@ -139,14 +237,23 @@ async function loadData() {
   loading.value = true
   error.value = ''
   try {
-    const [eventData, groupsData, bookingsData] = await Promise.all([
+    const [eventData, groupsData, bookingsData, guidesData] = await Promise.all([
       getEventById(eventId),
       getGroupsByEvent(eventId),
       getBookingsByEvent(eventId),
+      getAvailableGuidesForEvent(eventId),
     ])
     event.value = eventData
     groups.value = groupsData
+    availableGuides.value = guidesData
     bookings.value = bookingsData
+    ungroupedBookings.value = bookingsData.filter((b) => b.group === null && b.status !== 'deleted')
+    // reconstruimos el mapa de reservas por grupo
+    const map: Record<number, Booking[]> = {}
+    for (const group of groupsData) {
+      map[group.id] = bookingsData.filter((b) => b.group?.id === group.id && b.status !== 'deleted')
+    }
+    bookingsByGroup.value = map
   } catch {
     error.value = 'Error al cargar los datos'
   } finally {
@@ -164,6 +271,8 @@ async function handleGenerateGroups() {
   generating.value = true
   error.value = ''
   try {
+    // borramos los grupos no confirmados antes de generar la nueva propuesta
+    await deleteGroups(eventId)
     // generamos la propuesta
     const proposal = await generateGroups(eventId)
     // guardamos los grupos propuestos en la BBDD como no confirmados
@@ -215,6 +324,68 @@ async function handleToggleConfirmed(group: Group) {
     await loadData()
   } catch {
     error.value = 'Error al actualizar el grupo'
+  }
+}
+
+// para asignar o cambiar el guía de un grupo
+async function handleAssignGuide(groupId: number, userId: number | null) {
+  try {
+    await assignGuide(groupId, userId)
+    await loadData()
+  } catch {
+    error.value = 'Error al asignar el guía'
+  }
+}
+
+// BORRAR GRUPO
+// id del grupo que se está borrando, para mostrar spinner en su botón
+const deletingGroupId = ref<number | null>(null)
+
+// para borrar un grupo no confirmado específico
+async function handleDeleteGroup(groupId: number) {
+  deletingGroupId.value = groupId
+  try {
+    await deleteGroups(eventId, groupId)
+    await loadData()
+  } catch {
+    error.value = 'Error al borrar el grupo'
+  } finally {
+    deletingGroupId.value = null
+  }
+}
+
+// DRAG & DROP
+
+// tipo mínimo para el evento @end de Vue Draggable
+interface DragEndEvent {
+  from: HTMLElement
+  to: HTMLElement
+  item: HTMLElement
+}
+
+// para reflejar la acción del drag en el backend
+// se dispara al soltar una tarjeta y persiste el cambio en el backend
+async function handleDragEnd(event: DragEndEvent) {
+  // leemos el group-id del contenedor destino (atributo data-group-id del div)
+  const toGroupId = event.to.dataset.groupId
+  const fromGroupId = event.from.dataset.groupId
+
+  // si no se movió entre columnas distintas, no hacemos nada
+  if (toGroupId === fromGroupId) return
+
+  // el elemento arrastrado es el item de BookingCard — leemos su data-booking-id
+  if (!event.item.dataset.bookingId || !event.to.dataset.groupId) return
+  const bookingId = parseInt(event.item.dataset.bookingId)
+  const targetGroupId = event.to.dataset.groupId === '0' ? null : parseInt(event.to.dataset.groupId)
+
+  try {
+    await assignBookingToGroup(bookingId, targetGroupId)
+    // recargamos para sincronizar el estado con la BBDD
+    await loadData()
+  } catch {
+    error.value = 'Error al mover la reserva'
+    // revertimos recargando aunque haya fallado
+    await loadData()
   }
 }
 

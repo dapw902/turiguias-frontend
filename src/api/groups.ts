@@ -71,3 +71,27 @@ export async function deleteGroups(eventId: number, groupId?: number) {
   const url = groupId ? `/groups/delete/${eventId}/${groupId}` : `/groups/delete/${eventId}`
   await api.delete(url)
 }
+
+// para mover una reserva a un grupo o desasignarla
+export async function assignBookingToGroup(bookingId: number, targetGroupId: number | null) {
+  const target = targetGroupId ?? 0
+  await api.patch(`/groups/assign-booking/${bookingId}/to/${target}`)
+}
+
+// interfaz para un guía disponible para un evento
+export interface AvailableGuide {
+  guide_id: number
+  guide_name: string
+  capacity: number
+}
+
+// para obtener los guías disponibles para un evento concreto
+export async function getAvailableGuidesForEvent(eventId: number) {
+  const response = await api.get<AvailableGuide[]>(`/groups/available-guides/${eventId}`)
+  return response.data
+}
+
+// para asignar o cambiar el guía de un grupo (userId = null para desasignar)
+export async function assignGuide(groupId: number, userId: number | null) {
+  await api.patch(`/groups/assign-guide/${groupId}`, { user_id: userId })
+}
