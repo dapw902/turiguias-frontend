@@ -37,8 +37,8 @@
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
                 @click="showPassword = !showPassword"
               >
-                <span v-if="showPassword">👁️</span>
-                <span v-else>👁️‍🗨️</span>
+                <EyeOff v-if="showPassword" :size="16" />
+                <Eye v-else :size="16" />
               </button>
             </div>
           </div>
@@ -69,6 +69,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 // importamos la store de Auth
 import { useAuthStore } from '@/stores/auth'
+// iconos
+import { Eye, EyeOff } from '@lucide/vue'
 
 // para navegar
 const router = useRouter()
@@ -85,7 +87,6 @@ const showPassword = ref(false)
 // función para inicio de sesión (se ejecuta al hacer submit)
 async function handleLogin() {
   // limpiamos el error anterior
-  console.log('handleLogin llamado')
   error.value = ''
 
   // validación manual para verificar que los inputs no estén vacíos
@@ -109,8 +110,7 @@ async function handleLogin() {
     } else {
       router.push('/guide/events')
     }
-  } catch (e: unknown) {
-    console.log('Error:', e)
+  } catch {
     error.value = 'Email o contraseña incorrectos'
   } finally {
     // siempre desactivamos el loading, haya error o no

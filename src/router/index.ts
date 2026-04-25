@@ -15,6 +15,11 @@ const router = createRouter({
       component: () => import('@/views/auth/LoginView.vue'),
     },
     {
+      path: '/change-password',
+      name: 'change-password',
+      component: () => import('@/views/auth/ChangePasswordView.vue'),
+    },
+    {
       path: '/admin',
       component: () => import('@/layouts/AdminLayout.vue'),
       children: [
@@ -47,6 +52,21 @@ const router = createRouter({
 router.beforeEach((to, _from) => {
   const authStore = useAuthStore()
 
+  // si no está autenticado y no es login, redirigimos
+  if (!authStore.isAuthenticated && to.name !== 'login') {
+    return '/login'
+  }
+
+  // si está autenticado y debe cambiar contraseña, solo puede ir a /change-password
+  if (authStore.isAuthenticated && authStore.mustChangePassword && to.name !== 'change-password') {
+    return '/change-password'
+  }
+
+  // si ya cambió la contraseña y intenta ir a /change-password, redirigimos a su panel
+  if (authStore.isAuthenticated && !authStore.mustChangePassword && to.name === 'change-password') {
+    return authStore.isAdmin ? '/admin/events' : '/guide/events'
+  }
+
   // si la ruta es login y ya está autenticado, redirigimos a su panel
   if (to.name === 'login' && authStore.isAuthenticated) {
     return authStore.isAdmin ? '/admin/events' : '/guide/events'
@@ -56,7 +76,6 @@ router.beforeEach((to, _from) => {
   if (to.path.startsWith('/admin') && !authStore.isAdmin) {
     if (!authStore.isAuthenticated) return '/login'
     const equivalentPath = to.path.replace('/admin', '/guide')
-    // verificamos si la ruta equivalente existe, si no, redirigimos a la vista por defecto
     const routeExists = router.resolve(equivalentPath).matched.length > 0
     return routeExists ? equivalentPath : '/guide/events'
   }
@@ -67,11 +86,6 @@ router.beforeEach((to, _from) => {
     const equivalentPath = to.path.replace('/guide', '/admin')
     const routeExists = router.resolve(equivalentPath).matched.length > 0
     return routeExists ? equivalentPath : '/admin/events'
-  }
-
-  // si no está autenticado y no es login, redirigimos
-  if (!authStore.isAuthenticated && to.name !== 'login') {
-    return '/login'
   }
 })
 

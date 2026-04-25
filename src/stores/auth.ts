@@ -13,6 +13,7 @@ interface User {
   phone: string | null
   notes: string | null
   photo: string | null
+  must_change_password: boolean
 }
 
 // creamos y exportamos el store auth para autenticación y control de sesión de los usuarios
@@ -27,6 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
   const isAdmin = computed(() => user.value?.role === 'admin')
   const isGuide = computed(() => user.value?.role === 'guide')
+  const mustChangePassword = computed(() => user.value?.must_change_password === true)
 
   // llamos al método para hacer login
   async function login(email: string, password: string) {
@@ -46,6 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
       phone: null,
       notes: null,
       photo: null,
+      must_change_password: true,
     }
 
     // guardamos en localStorage para persistir la sesión
@@ -73,5 +76,15 @@ export const useAuthStore = defineStore('auth', () => {
     window.location.href = '/login'
   }
 
-  return { token, user, isAuthenticated, isAdmin, isGuide, login, logout, fetchCurrentUser }
+  return {
+    token,
+    user,
+    isAuthenticated,
+    isAdmin,
+    isGuide,
+    mustChangePassword,
+    login,
+    logout,
+    fetchCurrentUser,
+  }
 })
