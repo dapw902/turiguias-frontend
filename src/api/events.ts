@@ -40,3 +40,9 @@ export async function getEvents(params: {
   const response = await api.get<PaginatedEvents>('/events', { params })
   return response.data
 }
+
+// para obtener un evento específico por id
+export async function getEventById(id: number) {
+  const response = await api.get<Event>(`/events/${id}`)
+  return response.data
+}

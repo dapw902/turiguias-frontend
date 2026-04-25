@@ -23,3 +23,51 @@ export async function getGroupsByEvent(eventId: number) {
   const response = await api.get<Group[]>(`/groups/event/${eventId}`)
   return response.data
 }
+
+// interfaz para la respuesta del algoritmo de generación de grupos
+export interface GeneratedGroups {
+  groups: {
+    bookings: {
+      id: number
+      pax: number
+    }[]
+    totalPax: number
+    needs_attention: boolean
+  }[]
+  available_guides: {
+    guide_id: number
+    guide_name: string
+    capacity: number
+  }[]
+  message: string
+}
+
+// interfaz para confirmar los grupos generados
+export interface ConfirmGroupsDto {
+  event_id: number
+  groups: {
+    booking_ids: number[]
+    user_id?: number | null
+    group_id?: number | null
+    confirmed?: boolean
+    needs_attention?: boolean
+  }[]
+}
+
+// para generar una propuesta de grupos automáticamente
+export async function generateGroups(eventId: number) {
+  const response = await api.post<GeneratedGroups>(`/groups/generate/${eventId}`)
+  return response.data
+}
+
+// para crear o actualizar grupos — usado tanto para generar grupos como para confirmarlos
+export async function saveGroups(dto: ConfirmGroupsDto) {
+  const response = await api.post('/groups/confirm', dto)
+  return response.data
+}
+
+// para borrar grupos no confirmados de un evento o específico (groupId)
+export async function deleteGroups(eventId: number, groupId?: number) {
+  const url = groupId ? `/groups/delete/${eventId}/${groupId}` : `/groups/delete/${eventId}`
+  await api.delete(url)
+}

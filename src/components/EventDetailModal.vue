@@ -40,9 +40,7 @@
 
       <!-- acciones -->
       <div class="flex justify-center gap-2">
-        <button class="btn text-lg font-normal btn-gradient" @click="goToGroups()">
-          Ver grupos
-        </button>
+        <button class="btn font-normal btn-gradient" @click="goToGroups()">Ver grupos</button>
       </div>
     </div>
     <!-- fondo oscuro que cierra el modal al hacer clic -->
