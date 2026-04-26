@@ -65,8 +65,52 @@
   color: white !important;
 }
 
+/* para botones de acción primarios y secundarios */
 .btn-gradient {
   background: var(--color-gradient) !important;
   border: none !important;
   color: white !important;
+}
+
+[data-theme='cupcake'] .btn-outline-gradient {
+  background: white;
+  border: 2px solid transparent;
+  background-image: linear-gradient(white, white), var(--color-gradient);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  color: var(--color-primary) !important;
+}
+
+[data-theme='forest'] .btn-outline-gradient {
+  background: #1c1617;
+  border: 2px solid transparent;
+  background-image: linear-gradient(#1c1617, #1c1617), var(--color-gradient);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.btn-outline-gradient:hover {
+  opacity: 0.85;
+}
+
+/* SELECTORES VUE */
+.vs__dropdown-toggle {
+  border-radius: 0.5rem !important;
+  border: 2px solid var(--color-secondary) !important;
+  padding: 4px 8px !important;
+  background-color: var(--color-base-100) !important;
+  color: color-mix(in oklab, var(--color-base-content) 60%, #0000) !important;
+  border-radius: 1.5rem !important;
+}
+
+.vs__dropdown-menu {
+  border-radius: 0.5rem !important;
+  border: 2px solid var(--color-secondary) !important;
+  margin-top: 4px !important;
+  background-color: var(--color-base-100) !important;
+  color: color-mix(in oklab, var(--color-base-content) 60%, #0000) !important;
+}
+
+.vs__dropdown-toggle:focus-within {
+  outline: none !important;
 }

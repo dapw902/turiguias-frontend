@@ -23,7 +23,7 @@
         </div>
         <!-- botones de acción -->
         <div class="flex gap-2">
-          <button class="btn btn-outline" @click="handleCreateGroup()">Crear grupo</button>
+          <button class="btn btn-outline-gradient" @click="handleCreateGroup()">Crear grupo</button>
           <button
             class="btn btn-gradient text-white"
             :disabled="generating"

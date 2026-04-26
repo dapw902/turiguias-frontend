@@ -16,7 +16,7 @@
       <div v-if="timezones.length > 1" class="flex gap-2 mb-4">
         <button
           class="btn btn-sm"
-          :class="activeTimezone === null ? 'btn-gradient' : 'btn-outline'"
+          :class="activeTimezone === null ? 'btn-gradient' : 'btn-outline-gradient'"
           @click="selectAllTimezones()"
         >
           Todas
@@ -25,7 +25,7 @@
           v-for="tz in timezones"
           :key="tz"
           class="btn btn-sm"
-          :class="activeTimezone === tz ? 'btn-gradient' : 'btn-outline'"
+          :class="activeTimezone === tz ? 'btn-gradient' : 'btn-outline-gradient'"
           @click="selectTimezone(tz)"
         >
           {{ tz }}

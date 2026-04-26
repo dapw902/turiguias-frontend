@@ -16,8 +16,8 @@
         <input
           v-model="search"
           type="text"
-          placeholder="Buscar por nombre, email o rol..."
-          class="input input-secondary w-80"
+          placeholder="Buscar por nombre, email o rol"
+          class="input input-secondary w-80 text-base"
         />
         <button class="btn btn-gradient text-white" @click="openCreateModal">Nuevo usuario</button>
       </div>
@@ -40,7 +40,14 @@
               :key="user.id"
               :class="{ 'opacity-40': user.id === authStore.user?.id }"
             >
-              <td class="font-medium">{{ user.name }}</td>
+              <td class="font-medium">
+                <div class="flex items-center gap-2">
+                  {{ user.name }}
+                  <div v-if="user.notes" class="tooltip tooltip-right" :data-tip="user.notes">
+                    <Info :size="14" class="text-base-content/40 cursor-help" />
+                  </div>
+                </div>
+              </td>
               <td>{{ user.email }}</td>
               <td>{{ user.phone ?? '—' }}</td>
               <td>
@@ -103,7 +110,7 @@ import { getUsers, deleteUser, type User } from '@/api/users'
 // para saber qué usuario está logueado y no permitirle borrarse o editarse
 import { useAuthStore } from '@/stores/auth'
 // iconos
-import { Trash2, Pencil } from '@lucide/vue'
+import { Trash2, Pencil, Info } from '@lucide/vue'
 // modal para creación y actualización de usuarios
 import UserModal from '@/components/UserModal.vue'
 
