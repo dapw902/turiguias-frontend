@@ -22,6 +22,22 @@
         </button>
       </div>
 
+      <!-- navegación entre subvistas del guía -->
+      <div class="flex gap-2 mb-6 justify-center">
+        <button
+          class="btn btn-sm btn-outline-gradient"
+          @click="router.push(`/admin/guides/${guideId}/services`)"
+        >
+          Servicios
+        </button>
+        <button
+          class="btn btn-sm btn-outline-gradient"
+          @click="router.push(`/admin/guides/${guideId}/groups`)"
+        >
+          Grupos
+        </button>
+      </div>
+
       <!-- formulario de nueva disponibilidad -->
       <div v-if="showForm" class="bg-base-100 rounded-xl p-4 shadow-sm mb-4">
         <h3 class="font-bold text-sm mb-3">Nueva franja de disponibilidad</h3>
@@ -150,8 +166,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-// para acceso a los parámetros de la URL
-import { useRoute } from 'vue-router'
+// para acceso a los parámetros de la URL y navegación
+import { useRouter, useRoute } from 'vue-router'
 // importamos FullCalendar y los plugins necesarios
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -167,6 +183,8 @@ import {
 } from '@/api/guide-availability'
 // para obtener la timezone del guía a través de sus servicios
 import { getGuideServices } from '@/api/guide-services'
+// para obtener el listado de los usuarios
+import { getUsers } from '@/api/users'
 // para conversión de fechas
 import { DateTime } from 'luxon'
 // iconos
@@ -178,6 +196,8 @@ import 'flatpickr/dist/flatpickr.min.css'
 import type { Instance } from 'flatpickr/dist/types/instance'
 
 const route = useRoute()
+const router = useRouter()
+
 // leemos el guideId de la URL (/admin/guides/:guideId/availability)
 const guideId = parseInt(route.params.guideId as string)
 
@@ -269,15 +289,19 @@ async function loadData() {
   loading.value = true
   error.value = ''
   try {
-    const [availabilityData, servicesData] = await Promise.all([
+    const [availabilityData, servicesData, usersData] = await Promise.all([
       getGuideAvailability(guideId),
       getGuideServices(),
+      getUsers(),
     ])
 
-    // buscamos los datos del guía en la respuesta
+    // el nombre siempre lo sacamos del listado de usuarios
+    const guideUser = usersData.find((u) => u.id === guideId)
+    if (guideUser) guideName.value = guideUser.name
+
+    // los horarios solo si existen
     const guideData = availabilityData[0]
     if (guideData) {
-      guideName.value = guideData.guide_name
       availabilities.value = guideData.availabilities
     }
 
