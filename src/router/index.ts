@@ -43,6 +43,21 @@ const router = createRouter({
           name: 'admin-guides',
           component: () => import('@/views/admin/GuidesView.vue'),
         },
+        {
+          path: 'guides/:guideId/availability',
+          name: 'admin-guide-availability',
+          component: () => import('@/views/admin/GuideAvailabilityView.vue'),
+        },
+        {
+          path: 'guides/:guideId/services',
+          name: 'admin-guide-services',
+          component: () => import('@/views/admin/GuideServicesView.vue'),
+        },
+        {
+          path: 'guides/:guideId/groups',
+          name: 'admin-guide-groups',
+          component: () => import('@/views/admin/GuideGroupsView.vue'),
+        },
       ],
     },
     {

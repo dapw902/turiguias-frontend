@@ -46,14 +46,6 @@
         </RouterLink>
 
         <RouterLink
-          to="/admin/services"
-          class="flex items-center gap-3 px-5 py-3 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-          active-class="text-white bg-white/20 border-l-4 border-white"
-        >
-          <span>Servicios</span>
-        </RouterLink>
-
-        <RouterLink
           to="/admin/users"
           class="flex items-center gap-3 px-5 py-3 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
           active-class="text-white bg-white/20 border-l-4 border-white"
@@ -153,8 +145,10 @@ const route = useRoute()
 const pageTitle = computed(() => {
   if (route.path.includes('/events') && route.path.includes('/groups')) return 'Grupos'
   if (route.path.includes('/events')) return 'Eventos'
+  if (route.path.includes('/guides') && route.path.includes('/availability')) return 'Horarios'
+  if (route.path.includes('/guides') && route.path.includes('/services')) return 'Servicios'
+  if (route.path.includes('/guides') && route.path.includes('/groups')) return 'Grupos'
   if (route.path.includes('/guides')) return 'Guías'
-  if (route.path.includes('/services')) return 'Servicios'
   if (route.path.includes('/users')) return 'Usuarios'
   return ''
 })

@@ -95,7 +95,6 @@
 
 /* SELECTORES VUE */
 .vs__dropdown-toggle {
-  border-radius: 0.5rem !important;
   border: 2px solid var(--color-secondary) !important;
   padding: 4px 8px !important;
   background-color: var(--color-base-100) !important;
@@ -113,4 +112,49 @@
 
 .vs__dropdown-toggle:focus-within {
   outline: none !important;
+}
+
+/* FLATPICKR */
+.flatpickr-calendar {
+  font-family: inherit !important;
+}
+
+.flatpickr-day.today {
+  border-color: var(--color-primary) !important;
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+[data-theme='forest'] .flatpickr-calendar {
+  background: #1c1617 !important;
+  color: white !important;
+  border-color: #3c3c3b !important;
+}
+
+[data-theme='forest'] .flatpickr-day {
+  color: white !important;
+}
+
+[data-theme='forest'] .flatpickr-day:hover {
+  background: #3c3c3b !important;
+}
+
+[data-theme='forest'] .flatpickr-months,
+[data-theme='forest'] .flatpickr-weekdays,
+[data-theme='forest'] .flatpickr-weekday {
+  background: #1c1617 !important;
+  color: white !important;
+}
+
+[data-theme='forest'] .flatpickr-current-month,
+[data-theme='forest'] .flatpickr-current-month .cur-month,
+[data-theme='forest'] .flatpickr-current-month .cur-year,
+[data-theme='forest'] .flatpickr-current-month input.cur-year {
+  color: white !important;
+}
+
+[data-theme='forest'] .flatpickr-prev-month,
+[data-theme='forest'] .flatpickr-next-month {
+  color: white !important;
+  fill: white !important;
 }
