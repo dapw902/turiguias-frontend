@@ -46,3 +46,8 @@ export async function getEventById(id: number) {
   const response = await api.get<Event>(`/events/${id}`)
   return response.data
 }
+
+// para sincronizar los eventos desde TuriTop
+export async function syncEvents() {
+  await api.post('/events/sync-events')
+}

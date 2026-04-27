@@ -18,3 +18,8 @@ export async function getServices() {
   })
   return response.data.data
 }
+
+// para sincronizar los servicios desde TuriTop
+export async function syncServices() {
+  await api.post('/services/sync')
+}

@@ -55,3 +55,8 @@ export async function getBookings(params: { page?: number; limit?: number }) {
   const response = await api.get<PaginatedBookings>('/bookings', { params })
   return response.data
 }
+
+// para sincronizar las reservas desde TuriTop
+export async function syncBookings() {
+  await api.post('/bookings/sync')
+}

@@ -12,23 +12,38 @@
 
     <!-- calendario (siempre montado) -->
     <div class="bg-base-100 rounded-xl p-4 shadow-sm relative">
-      <!-- tabs de timezone (solo si hay más de una) -->
-      <div v-if="timezones.length > 1" class="flex gap-2 mb-4">
+      <!-- tabs de timezone y botón de sincronización -->
+      <div class="flex items-center justify-between mb-4">
+        <!-- tabs de timezone (solo si hay más de una) -->
+        <div v-if="timezones.length > 1" class="flex gap-2">
+          <button
+            class="btn btn-sm"
+            :class="activeTimezone === null ? 'btn-gradient' : 'btn-outline-gradient'"
+            @click="selectAllTimezones()"
+          >
+            Todas
+          </button>
+          <button
+            v-for="tz in timezones"
+            :key="tz"
+            class="btn btn-sm"
+            :class="activeTimezone === tz ? 'btn-gradient' : 'btn-outline-gradient'"
+            @click="selectTimezone(tz)"
+          >
+            {{ tz }}
+          </button>
+        </div>
+        <div v-else></div>
+
+        <!-- botón de sincronización manual -->
         <button
-          class="btn btn-sm"
-          :class="activeTimezone === null ? 'btn-gradient' : 'btn-outline-gradient'"
-          @click="selectAllTimezones()"
+          class="btn btn-outline-gradient btn-sm gap-2"
+          :disabled="syncing"
+          @click="handleSync"
         >
-          Todas
-        </button>
-        <button
-          v-for="tz in timezones"
-          :key="tz"
-          class="btn btn-sm"
-          :class="activeTimezone === tz ? 'btn-gradient' : 'btn-outline-gradient'"
-          @click="selectTimezone(tz)"
-        >
-          {{ tz }}
+          <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
+          <RefreshCw v-else :size="14" />
+          {{ syncing ? 'Sincronizando...' : 'Sincronizar' }}
         </button>
       </div>
 
@@ -91,6 +106,12 @@ import EventDetailModal from '@/components/EventDetailModal.vue'
 import { getGuides, type User } from '@/api/users'
 // para conversión de UTC a hora local
 import { DateTime } from 'luxon'
+// para la sincronización manual de la BBDD
+import { syncServices } from '@/api/services'
+import { syncEvents } from '@/api/events'
+import { syncBookings } from '@/api/bookings'
+// icono sincronización
+import { RefreshCw } from '@lucide/vue'
 
 const calendarRef = useTemplateRef<InstanceType<typeof FullCalendar>>('calendar')
 
@@ -115,7 +136,7 @@ function toCalendarEvent(event: Event): EventInput {
   const isPast = new Date(event.event_time * 1000) < new Date()
   return {
     id: String(event.id),
-    title: `${event.service.name} · ${event.totalPax} pax`,
+    title: `${event.service.turitop_product_id} - ${event.service.name} (${event.totalPax} pax)`,
     start: toLocalDateString(event.event_time, event.service.timezone),
     end: toLocalDateString(event.event_time + event.duration * 60, event.service.timezone),
     backgroundColor: isPast ? '#9ca3af' : event.status === 'open' ? '#2eac66' : '#ef4444',
@@ -165,10 +186,8 @@ const filteredServices = computed(() => {
 
 async function loadServices() {
   services.value = await getServices()
-  // seleccionamos la primera timezone por defecto
-  if (timezones.value.length > 0) {
-    activeTimezone.value = timezones.value[0] ?? null
-  }
+  // por defecto mostramos todas las timezones
+  activeTimezone.value = null
 }
 
 // FILTRO POR GUÍAS
@@ -221,6 +240,29 @@ async function loadEvents() {
     error.value = 'Error al cargar los eventos'
   } finally {
     loading.value = false
+  }
+}
+
+// SINCRONIZACIÓN
+// estado de carga del botón de sincronización
+const syncing = ref(false)
+
+// para sincronizar servicios, eventos y reservas en orden
+async function handleSync() {
+  syncing.value = true
+  error.value = ''
+  try {
+    await syncServices()
+    await syncEvents()
+    await syncBookings()
+    // recargamos servicios y eventos tras la sincronización
+    await loadServices()
+    await loadGuides()
+    await loadEvents()
+  } catch {
+    error.value = 'Error al sincronizar los datos'
+  } finally {
+    syncing.value = false
   }
 }
 
