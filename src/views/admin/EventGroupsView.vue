@@ -5,12 +5,13 @@
       <span class="loading loading-spinner loading-lg" style="color: var(--color-primary)"></span>
     </div>
 
-    <!-- mensaje de error -->
-    <div v-else-if="error" class="alert alert-error mb-4">
-      {{ error }}
-    </div>
-
     <div v-else>
+      <!-- mensaje de error -->
+      <div v-if="error" class="banner-warning">
+        <span class="text-2xl">⚠️</span>
+        <p class="font-bold text-error">{{ error }}</p>
+      </div>
+
       <!-- cabecera -->
       <div class="flex items-center justify-between mb-6">
         <div>
@@ -21,6 +22,7 @@
             {{ groups.length }} grupo/s
           </p>
         </div>
+
         <!-- botones de acción -->
         <div class="flex gap-2">
           <button class="btn btn-outline-gradient" @click="handleCreateGroup()">Crear grupo</button>
@@ -35,50 +37,105 @@
         </div>
       </div>
 
+      <!-- warning de grupos con necesidad de atención -->
+      <div v-if="groups.some((g) => !!g.needs_attention)" class="banner-warning">
+        <span class="text-2xl">⚠️</span>
+        <div>
+          <p class="font-bold text-error">Hay grupos que requieren atención</p>
+          <p class="text-sm text-base-content/70">
+            Uno o más grupos superan la capacidad del guía asignado. Ajusta la capacidad o reasigna
+            las reservas antes de confirmar.
+          </p>
+        </div>
+      </div>
+
       <!-- área principal: grupos + reservas sueltas -->
       <div class="flex gap-4 overflow-x-auto pb-4">
         <!-- columnas de grupos -->
         <div
           v-for="group in groups"
           :key="group.id"
-          class="bg-base-100 rounded-xl p-4 shadow-sm min-w-72 w-72 flex-shrink-0"
+          class="bg-base-100 rounded-xl p-4 shadow-sm min-w-72 w-72 flex-shrink-0 border border-transparent"
+          :class="{ 'border-error': group.needs_attention }"
         >
           <!-- header del grupo -->
-          <div class="flex items-start justify-between mb-3">
-            <div>
+          <div class="flex flex-col mb-3 gap-2">
+            <!-- fila superior: título + checkbox + borrar -->
+            <div class="flex items-center justify-between">
               <p class="font-bold text-sm">Grupo {{ group.id }}</p>
-              <div
-                v-if="group.confirmed"
-                class="tooltip tooltip-right w-full"
-                data-tip="Desmarca 'Confirmado' para cambiar el guía"
-              >
-                <select
-                  class="select select-sm w-full max-w-44 mt-1 disabled:opacity-100 disabled:text-base-content"
-                  :value="group.user?.id ?? ''"
-                  :disabled="true"
+              <div class="flex items-center gap-2">
+                <!-- checkbox confirmed: bloqueado si needs_attention o sin guía asignado -->
+                <label
+                  class="flex items-center gap-1"
+                  :class="
+                    group.needs_attention || !group.user ? 'cursor-not-allowed' : 'cursor-pointer'
+                  "
                 >
-                  <option value="">Sin asignar</option>
-                  <option
-                    v-for="guide in availableGuides"
-                    :key="guide.guide_id"
-                    :value="guide.guide_id"
+                  <div
+                    v-if="group.needs_attention || !group.user"
+                    class="tooltip tooltip-bottom"
+                    :data-tip="
+                      group.needs_attention
+                        ? 'Resuelve el problema de capacidad antes de confirmar'
+                        : 'Asigna un guía antes de confirmar'
+                    "
                   >
-                    {{ guide.guide_name }}
-                  </option>
-                </select>
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-sm opacity-30"
+                      :checked="group.confirmed"
+                      disabled
+                    />
+                  </div>
+                  <input
+                    v-else
+                    type="checkbox"
+                    class="checkbox checkbox-sm"
+                    :checked="group.confirmed"
+                    @change="handleToggleConfirmed(group)"
+                  />
+                  <span
+                    class="text-xs"
+                    :class="{ 'text-base-content/30': group.needs_attention || !group.user }"
+                  >
+                    Confirmado
+                  </span>
+                </label>
+                <!-- botón borrar: grayed out si confirmado, activo si no -->
+                <div
+                  v-if="group.confirmed"
+                  class="tooltip tooltip-bottom"
+                  data-tip="Desmarca 'Confirmado' antes de borrar"
+                >
+                  <button class="btn btn-ghost btn-xs text-base-content/30 cursor-not-allowed">
+                    <Trash2 :size="14" />
+                  </button>
+                </div>
+                <button
+                  v-else
+                  class="btn btn-ghost btn-xs text-error hover:bg-error/10"
+                  :disabled="deletingGroupId === group.id"
+                  @click="handleDeleteGroup(group.id)"
+                >
+                  <span
+                    v-if="deletingGroupId === group.id"
+                    class="loading loading-spinner loading-xs"
+                  ></span>
+                  <Trash2 v-else :size="14" />
+                </button>
               </div>
+            </div>
+
+            <!-- selector de guía: ocupa todo el ancho, bloqueado si confirmado -->
+            <div
+              v-if="group.confirmed"
+              class="tooltip tooltip-bottom w-full"
+              data-tip="Desmarca 'Confirmado' para cambiar el guía"
+            >
               <select
-                v-else
-                class="select select-sm w-full max-w-44 mt-1"
+                class="select select-sm w-full disabled:opacity-100 disabled:text-base-content"
                 :value="group.user?.id ?? ''"
-                @change="
-                  handleAssignGuide(
-                    group.id,
-                    ($event.target as HTMLSelectElement).value === ''
-                      ? null
-                      : parseInt(($event.target as HTMLSelectElement).value),
-                  )
-                "
+                :disabled="true"
               >
                 <option value="">Sin asignar</option>
                 <option
@@ -90,38 +147,54 @@
                 </option>
               </select>
             </div>
-            <div class="flex items-center gap-2">
-              <!-- checkbox confirmed -->
-              <label class="flex items-center gap-1 cursor-pointer">
-                <input
-                  type="checkbox"
-                  class="checkbox checkbox-sm"
-                  :checked="group.confirmed"
-                  @change="handleToggleConfirmed(group)"
-                />
-                <span class="text-xs">Confirmado</span>
-              </label>
-              <!-- botón borrado. Grayed out si está confirmado, activo si no -->
-              <div
-                v-if="group.confirmed"
-                class="tooltip tooltip-bottom"
-                data-tip="Desmarca 'Confirmado' antes de borrar"
+            <select
+              v-else
+              class="select select-sm w-full"
+              :value="group.user?.id ?? ''"
+              @change="
+                handleAssignGuide(
+                  group.id,
+                  ($event.target as HTMLSelectElement).value === ''
+                    ? null
+                    : parseInt(($event.target as HTMLSelectElement).value),
+                )
+              "
+            >
+              <option value="">Sin asignar</option>
+              <option
+                v-for="guide in availableGuides"
+                :key="guide.guide_id"
+                :value="guide.guide_id"
               >
-                <button class="btn btn-ghost btn-xs text-base-content/30 cursor-not-allowed">
-                  <Trash2 :size="14" />
+                {{ guide.guide_name }}
+              </option>
+            </select>
+
+            <!-- ajuste manual de capacidad: solo si needs_attention -->
+            <div v-if="group.needs_attention">
+              <div v-if="adjustingCapacityGroupId === group.id" class="flex items-center gap-2">
+                <input
+                  v-model.number="manualCapacity"
+                  type="number"
+                  min="1"
+                  class="input input-secondary input-xs w-20"
+                />
+                <button
+                  class="btn btn-gradient btn-xs text-white"
+                  @click="handleAdjustCapacity(group)"
+                >
+                  Guardar
+                </button>
+                <button class="btn btn-ghost btn-xs" @click="adjustingCapacityGroupId = null">
+                  ✕
                 </button>
               </div>
               <button
                 v-else
-                class="btn btn-ghost btn-xs text-error hover:bg-error/10"
-                :disabled="deletingGroupId === group.id"
-                @click="handleDeleteGroup(group.id)"
+                class="btn btn-xs text-error border border-error hover:bg-error/10 w-full"
+                @click="toggleCapacityForm(group.id, group.capacity)"
               >
-                <span
-                  v-if="deletingGroupId === group.id"
-                  class="loading loading-spinner loading-xs"
-                ></span>
-                <Trash2 v-else :size="14" />
+                ⚠️ Ajustar capacidad
               </button>
             </div>
           </div>
@@ -142,7 +215,7 @@
           </draggable>
         </div>
 
-        <!-- columna de reservas sueltas — siempre visible para poder soltar aquí -->
+        <!-- columna de reservas sueltas: siempre visible para poder soltar aquí -->
         <div class="bg-base-100 rounded-xl p-4 shadow-sm min-w-72 w-72 flex-shrink-0">
           <p class="font-bold text-sm mb-3">Sin grupo ({{ ungroupedBookings.length }})</p>
           <draggable
@@ -197,7 +270,7 @@ import { DateTime } from 'luxon'
 import BookingCard from '@/components/BookingCard.vue'
 // para el drag and drop
 import draggable from 'vuedraggable'
-// icono
+// iconos
 import { Trash2 } from '@lucide/vue'
 
 const route = useRoute()
@@ -224,7 +297,7 @@ const ungroupedBookings = ref<Booking[]>([])
 const bookingsByGroup = ref<Record<number, Booking[]>>({})
 
 // HELPERS
-// para formatear el título del evento: "08:00 - Excursión Teide"
+// para formatear el título del evento: "dd/MM/yyyy - HH:mm - Nombre servicio"
 function formatEventTitle(event: Event): string {
   const dt = DateTime.fromSeconds(event.event_time).setZone(event.service.timezone)
   const time = dt.toFormat('HH:mm')
@@ -351,6 +424,33 @@ async function handleDeleteGroup(groupId: number) {
     error.value = 'Error al borrar el grupo'
   } finally {
     deletingGroupId.value = null
+  }
+}
+
+// AJUSTE MANUAL DE CAPACIDAD
+// id del grupo que está siendo ajustado
+const adjustingCapacityGroupId = ref<number | null>(null)
+// valor de la nueva capacidad manual
+const manualCapacity = ref<number>(1)
+
+// para mostrar u ocultar el formulario de ajuste
+function toggleCapacityForm(groupId: number, currentCapacity: number | null) {
+  if (adjustingCapacityGroupId.value === groupId) {
+    adjustingCapacityGroupId.value = null
+  } else {
+    adjustingCapacityGroupId.value = groupId
+    manualCapacity.value = currentCapacity ?? 1
+  }
+}
+
+// para guardar la capacidad manual y limpiar needs_attention
+async function handleAdjustCapacity(group: Group) {
+  try {
+    await assignGuide(group.id, group.user?.id ?? null, manualCapacity.value)
+    adjustingCapacityGroupId.value = null
+    await loadData()
+  } catch {
+    error.value = 'Error al ajustar la capacidad'
   }
 }
 

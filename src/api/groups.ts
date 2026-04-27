@@ -6,6 +6,7 @@ export interface Group {
   id: number
   confirmed: boolean
   needs_attention: boolean
+  capacity: number | null
   user: {
     id: number
     name: string
@@ -91,9 +92,9 @@ export async function getAvailableGuidesForEvent(eventId: number) {
   return response.data
 }
 
-// para asignar o cambiar el guía de un grupo (userId = null para desasignar)
-export async function assignGuide(groupId: number, userId: number | null) {
-  await api.patch(`/groups/assign-guide/${groupId}`, { user_id: userId })
+// para asignar o cambiar el guía de un grupo (userId = null para desasignar, capacity = si pasamos la capacidad manual)
+export async function assignGuide(groupId: number, userId: number | null, capacity?: number) {
+  await api.patch(`/groups/assign-guide/${groupId}`, { user_id: userId, capacity })
 }
 
 // interfaz para un grupo asignado a un guía
