@@ -95,3 +95,29 @@ export async function getAvailableGuidesForEvent(eventId: number) {
 export async function assignGuide(groupId: number, userId: number | null) {
   await api.patch(`/groups/assign-guide/${groupId}`, { user_id: userId })
 }
+
+// interfaz para un grupo asignado a un guía
+export interface GuideGroup {
+  group_id: number
+  confirmed: boolean
+  needs_attention: boolean
+  event_id: number
+  event_time: number
+  service_name: string
+  service_timezone: string
+  capacity: number | null
+  total_pax: number
+  booking_count: number
+}
+
+// para obtener los grupos asignados a un guía con paginación
+export async function getGroupsByGuide(guideId: number, page = 1, limit = 10) {
+  const response = await api.get<{
+    data: GuideGroup[]
+    total: number
+    page: number
+    limit: number
+    totalPages: number
+  }>(`/groups/guide/${guideId}`, { params: { page, limit } })
+  return response.data
+}
