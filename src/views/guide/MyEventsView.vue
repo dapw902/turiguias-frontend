@@ -12,47 +12,12 @@
 
     <!-- calendario (siempre montado) -->
     <div class="bg-base-100 rounded-xl p-4 shadow-sm relative">
-      <!-- tabs de timezone y botón de sincronización -->
-      <div class="flex items-center justify-between mb-4">
-        <!-- tabs de timezone (solo si hay más de una) -->
-        <div v-if="timezones.length > 1" class="flex gap-2">
-          <button
-            class="btn btn-sm"
-            :class="activeTimezone === null ? 'btn-gradient' : 'btn-outline-gradient'"
-            @click="selectAllTimezones()"
-          >
-            Todas
-          </button>
-          <button
-            v-for="tz in timezones"
-            :key="tz"
-            class="btn btn-sm"
-            :class="activeTimezone === tz ? 'btn-gradient' : 'btn-outline-gradient'"
-            @click="selectTimezone(tz)"
-          >
-            {{ tz }}
-          </button>
-        </div>
-        <div v-else></div>
-
-        <!-- botón de sincronización manual -->
-        <button
-          class="btn btn-outline-gradient btn-sm gap-2"
-          :disabled="syncing"
-          @click="handleSync"
-        >
-          <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
-          <RefreshCw v-else :size="14" />
-          {{ syncing ? 'Sincronizando...' : 'Sincronizar' }}
-        </button>
-      </div>
-
-      <!-- filtros por servicio y por guías -->
+      <!-- filtros por servicio -->
       <div class="mb-4 flex items-center gap-3 flex-wrap">
         <label class="text-sm font-medium" for="service-filter">Filtrar por servicio:</label>
         <VueSelect
           v-model="selectedServiceId"
-          :options="filteredServices"
+          :options="services"
           :reduce="(s: Service) => s.id"
           label="name"
           placeholder="Todos los servicios"
@@ -62,19 +27,6 @@
           <template #option="{ turitop_product_id, name }">
             {{ turitop_product_id }} — {{ name }}
           </template>
-          <template #no-options> No se encontraron resultados </template>
-        </VueSelect>
-
-        <label class="text-sm font-medium" for="guide-filter">Guía:</label>
-        <VueSelect
-          v-model="selectedGuideId"
-          :options="guides"
-          :reduce="(g: User) => g.id"
-          label="name"
-          placeholder="Todos los guías"
-          @update:modelValue="loadEvents()"
-          class="w-48"
-        >
           <template #no-options> No se encontraron resultados </template>
         </VueSelect>
       </div>
@@ -89,7 +41,7 @@
 <script setup lang="ts">
 // para crear variables reactivas, valores calculados y ejecutar código al montar el componente
 // referencia al componente FullCalendar para acceder a su API
-import { ref, onMounted, computed, useTemplateRef } from 'vue'
+import { ref, onMounted, useTemplateRef } from 'vue'
 // importamos FullCalendar y los plugins necesarios
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -102,28 +54,14 @@ import { getEvents, type Event } from '@/api/events'
 import { getServices, type Service } from '@/api/services'
 // importamos el componente del modal
 import EventDetailModal from '@/components/EventDetailModal.vue'
-// importamos la función y la interfaz de usuarios
-import { getGuides, type User } from '@/api/users'
 // para conversión de UTC a hora local
 import { DateTime } from 'luxon'
-// para la sincronización manual de la BBDD
-import { syncServices } from '@/api/services'
-import { syncEvents } from '@/api/events'
-import { syncBookings } from '@/api/bookings'
-// icono sincronización
-import { RefreshCw } from '@lucide/vue'
+// importamos la store de Auth para identificar al guía logueado
+import { useAuthStore } from '@/stores/auth'
 
 const calendarRef = useTemplateRef<InstanceType<typeof FullCalendar>>('calendar')
 
-// TIMEZONES
-// timezones únicas detectadas en los servicios
-const timezones = computed(() => {
-  const unique = [...new Set(services.value.map((s) => s.timezone))]
-  return unique
-})
-
-// timezone activa (pestaña seleccionada)
-const activeTimezone = ref<string | null>(null)
+const authStore = useAuthStore()
 
 // EVENTOS Y CALENDARIO
 // estado de carga
@@ -178,27 +116,8 @@ const services = ref<Service[]>([])
 // servicio seleccionado para filtrar (null = todos)
 const selectedServiceId = ref<number | null>(null)
 
-// servicios filtrados según la timezone activa
-const filteredServices = computed(() => {
-  if (!activeTimezone.value) return services.value
-  return services.value.filter((s) => s.timezone === activeTimezone.value)
-})
-
 async function loadServices() {
   services.value = await getServices()
-  // por defecto mostramos todas las timezones
-  activeTimezone.value = null
-}
-
-// FILTRO POR GUÍAS
-// lista de guías para el filtro
-const guides = ref<User[]>([])
-// guía seleccionado para filtrar (null = todos)
-const selectedGuideId = ref<number | null>(null)
-
-// carga los guías para el filtro
-async function loadGuides() {
-  guides.value = await getGuides()
 }
 
 // CARGA EVENTOS BACKEND
@@ -215,54 +134,27 @@ async function loadEvents() {
       withBookings: true,
       limit: 1000,
       serviceId: selectedServiceId.value ?? undefined,
-      guideId: selectedGuideId.value ?? undefined,
+      guideId: authStore.user?.id ?? undefined,
     })
-    // filtramos por timezone activa en el frontend
-    const filtered = activeTimezone.value
-      ? result.data.filter((e) => e.service.timezone === activeTimezone.value)
-      : result.data
     if (initialLoad.value) {
-      // primera carga: pasamos los eventos via opciones
+      // carga inicial
       calendarOptions.value = {
         ...calendarOptions.value,
-        events: filtered.map(toCalendarEvent),
+        events: result.data.map(toCalendarEvent),
       }
       initialLoad.value = false
     } else {
-      // cargas siguientes: actualizamos sin reiniciar el calendario
+      // cargas siguientes
       const calendarApi = calendarRef.value?.getApi()
       if (calendarApi) {
         calendarApi.removeAllEvents()
-        calendarApi.addEventSource(filtered.map(toCalendarEvent))
+        calendarApi.addEventSource(result.data.map(toCalendarEvent))
       }
     }
   } catch {
     error.value = 'Error al cargar los eventos'
   } finally {
     loading.value = false
-  }
-}
-
-// SINCRONIZACIÓN
-// estado de carga del botón de sincronización
-const syncing = ref(false)
-
-// para sincronizar servicios, eventos y reservas en orden
-async function handleSync() {
-  syncing.value = true
-  error.value = ''
-  try {
-    await syncServices()
-    await syncEvents()
-    await syncBookings()
-    // recargamos servicios y eventos tras la sincronización
-    await loadServices()
-    await loadGuides()
-    await loadEvents()
-  } catch {
-    error.value = 'Error al sincronizar los datos'
-  } finally {
-    syncing.value = false
   }
 }
 
@@ -273,23 +165,8 @@ function toLocalDateString(timestamp: number, timezone: string): string {
   return DateTime.fromSeconds(timestamp).setZone(timezone).toFormat('yyyy-MM-dd HH:mm:ss')
 }
 
-// selecciona todas las timezones y resetea el filtro de servicio
-function selectAllTimezones() {
-  activeTimezone.value = null
-  selectedServiceId.value = null
-  loadEvents()
-}
-
-// selecciona una timezone específica y resetea el filtro de servicio
-function selectTimezone(tz: string) {
-  activeTimezone.value = tz
-  selectedServiceId.value = null
-  loadEvents()
-}
-
 onMounted(async () => {
   await loadServices()
-  await loadGuides()
   loadEvents()
 })
 </script>

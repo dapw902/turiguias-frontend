@@ -67,7 +67,22 @@ const router = createRouter({
         {
           path: 'events',
           name: 'guide-events',
-          component: () => import('@/views/guide/EventsView.vue'),
+          component: () => import('@/views/guide/MyEventsView.vue'),
+        },
+        {
+          path: 'services',
+          name: 'guide-services',
+          component: () => import('@/views/guide/MyServicesView.vue'),
+        },
+        {
+          path: 'availability',
+          name: 'guide-availability',
+          component: () => import('@/views/guide/MyAvailabilityView.vue'),
+        },
+        {
+          path: 'groups',
+          name: 'guide-groups',
+          component: () => import('@/views/guide/MyGroupsView.vue'),
         },
       ],
     },

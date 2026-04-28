@@ -46,11 +46,18 @@
         </RouterLink>
 
         <RouterLink
-          to="/guide/schedule"
+          to="/guide/availability"
           class="flex items-center gap-3 px-5 py-3 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
           active-class="text-white bg-white/20 border-l-4 border-white"
         >
           <span>Mis horarios</span>
+        </RouterLink>
+        <RouterLink
+          to="/guide/groups"
+          class="flex items-center gap-3 px-5 py-3 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+          active-class="text-white bg-white/20 border-l-4 border-white"
+        >
+          <span>Mis grupos</span>
         </RouterLink>
       </nav>
 
@@ -91,7 +98,7 @@
         <div v-else></div>
 
         <!-- título -->
-        <h2 class="text-3xl font-medium">Eventos</h2>
+        <h2 class="text-3xl font-medium">{{ pageTitle }}</h2>
 
         <!-- iconos mini-menu  -->
         <div class="flex items-center bg-base-100 rounded-full px-3 py-1 gap-2 shadow-sm">
@@ -125,11 +132,11 @@ import { useAuthStore } from '@/stores/auth'
 // importamos el store del tema
 import { useThemeStore } from '@/stores/theme'
 // para crear la variable reactiva para el aside colapsable
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 // para los iconos con Lucide
 import { LogOut, ChevronsRight, ChevronsLeft, Eclipse, Sun, UserCircle } from '@lucide/vue'
-// para las redirecciones
-import { useRouter } from 'vue-router'
+// para las redirecciones y títulos de las páginas
+import { useRouter, useRoute } from 'vue-router'
 
 const sidebarOpen = ref(true)
 
@@ -138,4 +145,17 @@ const authStore = useAuthStore()
 const themeStore = useThemeStore()
 
 const router = useRouter()
+
+const route = useRoute()
+
+// título dinámico según la ruta activa
+const pageTitle = computed(() => {
+  if (route.path.includes('/events')) return 'Mis eventos'
+  if (route.path.includes('/events') && route.path.includes('/list')) return 'Listado'
+  if (route.path.includes('/availability')) return 'Mis horarios'
+  if (route.path.includes('/services')) return 'Mis servicios'
+  if (route.path.includes('/groups') && route.path.includes('/list')) return 'Listado'
+  if (route.path.includes('/groups')) return 'Mis grupos'
+  return ''
+})
 </script>

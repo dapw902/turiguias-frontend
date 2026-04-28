@@ -107,7 +107,10 @@
               >
                 <div>
                   <p class="font-medium">{{ a.start_date }} — {{ a.end_date }}</p>
-                  <p class="text-xs text-base-content/60">{{ a.start_time }} — {{ a.end_time }}</p>
+                  <p class="text-xs text-base-content/60">
+                    {{ toGuideTime(a.start_time, a.start_date) }} —
+                    {{ toGuideTime(a.end_time, a.end_date) }}
+                  </p>
                 </div>
                 <button
                   class="btn btn-ghost btn-xs text-error hover:bg-error/10 flex-shrink-0"
@@ -136,7 +139,10 @@
               >
                 <div>
                   <p class="font-medium">{{ a.start_date }} — {{ a.end_date }}</p>
-                  <p class="text-xs text-base-content/60">{{ a.start_time }} — {{ a.end_time }}</p>
+                  <p class="text-xs text-base-content/60">
+                    {{ toGuideTime(a.start_time, a.start_date) }} —
+                    {{ toGuideTime(a.end_time, a.end_date) }}
+                  </p>
                 </div>
                 <button
                   class="btn btn-ghost btn-xs text-error hover:bg-error/10 flex-shrink-0"
@@ -154,7 +160,6 @@
           </div>
         </div>
 
-        <!-- calendario -->
         <!-- calendario -->
         <div class="bg-base-100 rounded-xl p-4 shadow-sm col-span-3">
           <FullCalendar :options="calendarOptions" />
@@ -252,9 +257,17 @@ const calendarOptions = ref<CalendarOptions>({
   displayEventTime: false,
 })
 
-// convierte las disponibilidades al formato de FullCalendar
-// cada franja genera un evento por día dentro del rango de fechas
-const calendarEvents = computed(() => {
+// HELPERS
+
+// convierte una hora UTC a la timezone del guía para mostrarla en la lista
+function toGuideTime(time: string, date: string): string {
+  return DateTime.fromISO(`${date}T${time}:00`, { zone: 'UTC' })
+    .setZone(guideTimezone.value)
+    .toFormat('HH:mm')
+}
+
+// genera los eventos del calendario con las horas convertidas a la timezone del guía
+function buildCalendarEvents() {
   const now = DateTime.now()
   const events = []
 
@@ -263,13 +276,16 @@ const calendarEvents = computed(() => {
     const end = DateTime.fromISO(a.end_date)
 
     while (current <= end) {
-      const dateStr = current.toISODate()
-      // comparamos cada día con la fecha actual, para pintar los eventos
+      const dateStr = current.toISODate()!
+      // comparamos cada día con la fecha actual para pintar los eventos
       const isPast = current < now.startOf('day')
+      // convertimos las horas UTC a la timezone del guía para el título
+      const localStart = toGuideTime(a.start_time, dateStr)
+      const localEnd = toGuideTime(a.end_time, dateStr)
 
       events.push({
         id: `${a.id}-${dateStr}`,
-        title: `${a.start_time} — ${a.end_time}`,
+        title: `${localStart} — ${localEnd}`,
         start: `${dateStr}T${a.start_time}:00`,
         end: `${dateStr}T${a.end_time}:00`,
         backgroundColor: isPast ? '#9ca3af' : '#2eac66',
@@ -282,7 +298,7 @@ const calendarEvents = computed(() => {
   }
 
   return events
-})
+}
 
 // CARGA DE DATOS
 async function loadData() {
@@ -311,10 +327,11 @@ async function loadData() {
       guideTimezone.value = guideServiceData.services[0].timezone
     }
 
-    // actualizamos los eventos del calendario
+    // actualizamos los eventos del calendario con la timezone ya cargada
     calendarOptions.value = {
       ...calendarOptions.value,
-      events: calendarEvents.value,
+      timeZone: guideTimezone.value,
+      events: buildCalendarEvents(),
     }
   } catch {
     error.value = 'Error al cargar los horarios'
