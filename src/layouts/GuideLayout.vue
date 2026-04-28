@@ -151,10 +151,10 @@ const route = useRoute()
 // título dinámico según la ruta activa
 const pageTitle = computed(() => {
   if (route.path.includes('/events')) return 'Mis eventos'
-  if (route.path.includes('/events') && route.path.includes('/list')) return 'Listado'
   if (route.path.includes('/availability')) return 'Mis horarios'
   if (route.path.includes('/services')) return 'Mis servicios'
-  if (route.path.includes('/groups') && route.path.includes('/list')) return 'Listado'
+  if (route.path.includes('/groups') && route.path.includes('/bookings'))
+    return 'Listado de reservas'
   if (route.path.includes('/groups')) return 'Mis grupos'
   return ''
 })

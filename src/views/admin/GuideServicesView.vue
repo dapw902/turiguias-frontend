@@ -26,13 +26,13 @@
 
       <div class="flex gap-2 mb-6 justify-center">
         <button
-          class="btn btn-sm btn-outline-gradient"
+          class="btn btn-outline-gradient"
           @click="router.push(`/admin/guides/${guideId}/availability`)"
         >
           Horarios
         </button>
         <button
-          class="btn btn-sm btn-outline-gradient"
+          class="btn btn-outline-gradient"
           @click="router.push(`/admin/guides/${guideId}/groups`)"
         >
           Grupos

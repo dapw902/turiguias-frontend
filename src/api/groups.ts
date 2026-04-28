@@ -122,3 +122,43 @@ export async function getGroupsByGuide(guideId: number, page = 1, limit = 10) {
   }>(`/groups/guide/${guideId}`, { params: { page, limit } })
   return response.data
 }
+
+// interfaz para una reserva del grupo (sin precios)
+export interface GroupBooking {
+  id: number
+  turitop_booking_id: string
+  pax: number
+  client_data: {
+    name: string
+    email: string
+    phone: string
+    comments: string
+  }
+  ticket_type_count: {
+    id: number
+    name: string
+    count: number
+    seats: number
+  }[]
+  status: string
+  notes: string | null
+}
+
+// interfaz para la respuesta del endpoint de reservas de un grupo
+export interface GroupWithBookings {
+  group_id: number
+  confirmed: boolean
+  event_time: number
+  service_name: string
+  service_timezone: string
+  guide_name: string | null
+  capacity: number | null
+  total_pax: number
+  bookings: GroupBooking[]
+}
+
+// para obtener las reservas de un grupo con info del grupo y evento
+export async function getBookingsByGroup(groupId: number) {
+  const response = await api.get<GroupWithBookings>(`/groups/${groupId}/bookings`)
+  return response.data
+}

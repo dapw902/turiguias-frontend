@@ -84,6 +84,11 @@ const router = createRouter({
           name: 'guide-groups',
           component: () => import('@/views/guide/MyGroupsView.vue'),
         },
+        {
+          path: 'groups/:groupId/bookings',
+          name: 'guide-group-bookings',
+          component: () => import('@/views/guide/GroupBookingsView.vue'),
+        },
       ],
     },
   ],

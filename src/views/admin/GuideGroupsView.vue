@@ -24,13 +24,13 @@
       <!-- navegación entre subvistas del guía -->
       <div class="flex gap-2 mb-6 justify-center">
         <button
-          class="btn btn-sm btn-outline-gradient"
+          class="btn btn-outline-gradient"
           @click="router.push(`/admin/guides/${guideId}/availability`)"
         >
           Horarios
         </button>
         <button
-          class="btn btn-sm btn-outline-gradient"
+          class="btn btn-outline-gradient"
           @click="router.push(`/admin/guides/${guideId}/services`)"
         >
           Servicios
@@ -60,14 +60,14 @@
                 <td>{{ group.total_pax }} pax</td>
                 <td>
                   <span
-                    class="badge badge-sm text-white"
+                    class="badge badge-md text-white"
                     :class="group.confirmed ? 'badge-success' : 'badge-warning'"
                   >
                     {{ group.confirmed ? 'Confirmado' : 'Pendiente' }}
                   </span>
                   <span
                     v-if="group.needs_attention"
-                    class="badge badge-sm badge-error text-white ml-1"
+                    class="badge badge-md badge-error text-white ml-1"
                   >
                     Atención
                   </span>
@@ -115,14 +115,14 @@
                 <td>{{ group.total_pax }} pax</td>
                 <td>
                   <span
-                    class="badge badge-sm text-white"
+                    class="badge badge-md text-white"
                     :class="group.confirmed ? 'badge-success' : 'badge-warning'"
                   >
                     {{ group.confirmed ? 'Confirmado' : 'Pendiente' }}
                   </span>
                   <span
                     v-if="group.needs_attention"
-                    class="badge badge-sm badge-error text-white ml-1"
+                    class="badge badge-md badge-error text-white ml-1"
                   >
                     Atención
                   </span>

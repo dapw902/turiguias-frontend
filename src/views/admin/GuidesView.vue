@@ -70,7 +70,7 @@
               <span
                 v-for="service in getServicesForGuide(guide.id).slice(0, 5)"
                 :key="service.id"
-                class="badge badge-sm w-full justify-start"
+                class="badge badge-md w-full justify-start"
               >
                 {{ service.turitop_product_id }} — {{ service.service_name }}
               </span>
@@ -87,21 +87,21 @@
           <!-- botones de acceso a subvistas — en vertical -->
           <div class="flex flex-col gap-2">
             <button
-              class="btn btn-outline-gradient btn-sm w-full gap-2"
+              class="btn btn-outline-gradient w-full gap-2"
               @click="router.push(`/admin/guides/${guide.id}/availability`)"
             >
               <Clock :size="14" />
               Horarios
             </button>
             <button
-              class="btn btn-outline-gradient btn-sm w-full gap-2"
+              class="btn btn-outline-gradient w-full gap-2"
               @click="router.push(`/admin/guides/${guide.id}/services`)"
             >
               <Briefcase :size="14" />
               Servicios
             </button>
             <button
-              class="btn btn-outline-gradient btn-sm w-full gap-2"
+              class="btn btn-outline-gradient w-full gap-2"
               @click="router.push(`/admin/guides/${guide.id}/groups`)"
             >
               <Users :size="14" />

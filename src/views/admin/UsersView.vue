@@ -52,7 +52,7 @@
               <td>{{ user.phone ?? '—' }}</td>
               <td>
                 <span
-                  class="badge badge-sm text-white"
+                  class="badge badge-md text-white"
                   :class="user.role === 'admin' ? 'badge-primary' : 'badge-success'"
                 >
                   {{ user.role }}

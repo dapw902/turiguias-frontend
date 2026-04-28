@@ -32,9 +32,6 @@
       </div>
       <FullCalendar ref="calendar" :options="calendarOptions" />
     </div>
-
-    <!-- modal de detalle del evento -->
-    <EventDetailModal :isOpen="modalOpen" :event="selectedEvent" @close="modalOpen = false" />
   </div>
 </template>
 
@@ -48,16 +45,18 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import type { EventClickArg, CalendarOptions, EventInput } from '@fullcalendar/core'
-// importamos la función y las interfaces de la API de eventos
+// importamos la funciones e interfaces necesarias
+import { getGroupsByEvent } from '@/api/groups'
 import { getEvents, type Event } from '@/api/events'
-// importamos la función y la interfaz de servicios
 import { getServices, type Service } from '@/api/services'
-// importamos el componente del modal
-import EventDetailModal from '@/components/EventDetailModal.vue'
 // para conversión de UTC a hora local
 import { DateTime } from 'luxon'
 // importamos la store de Auth para identificar al guía logueado
 import { useAuthStore } from '@/stores/auth'
+// para la navegación
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const calendarRef = useTemplateRef<InstanceType<typeof FullCalendar>>('calendar')
 
@@ -82,18 +81,6 @@ function toCalendarEvent(event: Event): EventInput {
     extendedProps: { event },
     display: 'block',
   }
-}
-
-// TARJETA EVENTO Y MODAL
-// controla si el modal está abierto
-const modalOpen = ref(false)
-// evento seleccionado al hacer clic
-const selectedEvent = ref<Event | null>(null)
-
-// función que se ejecuta al hacer clic en un evento del calendario
-function handleEventClick(info: EventClickArg) {
-  selectedEvent.value = info.event.extendedProps['event'] as Event
-  modalOpen.value = true
 }
 
 const calendarOptions = ref<CalendarOptions>({
@@ -163,6 +150,22 @@ async function loadEvents() {
 // convierte un timestamp UTC a una fecha/hora legible en la timezone indicada
 function toLocalDateString(timestamp: number, timezone: string): string {
   return DateTime.fromSeconds(timestamp).setZone(timezone).toFormat('yyyy-MM-dd HH:mm:ss')
+}
+
+// NAVEGACIÓN AL LISTADO
+// función que se ejecuta al hacer clic en un evento del calendario
+async function handleEventClick(info: EventClickArg) {
+  const event = info.event.extendedProps['event'] as Event
+  // buscamos el grupo del guía para ese evento
+  try {
+    const groups = await getGroupsByEvent(event.id)
+    const myGroup = groups.find((g) => g.user?.id === authStore.user?.id)
+    if (myGroup) {
+      router.push(`/guide/groups/${myGroup.id}/bookings`)
+    }
+  } catch {
+    // si falla silenciosamente no navegamos
+  }
 }
 
 onMounted(async () => {

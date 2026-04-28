@@ -36,11 +36,7 @@
         <div v-else></div>
 
         <!-- botón de sincronización manual -->
-        <button
-          class="btn btn-outline-gradient btn-sm gap-2"
-          :disabled="syncing"
-          @click="handleSync"
-        >
+        <button class="btn btn-outline-gradient gap-2" :disabled="syncing" @click="handleSync">
           <span v-if="syncing" class="loading loading-spinner loading-xs"></span>
           <RefreshCw v-else :size="14" />
           {{ syncing ? 'Sincronizando...' : 'Sincronizar' }}
