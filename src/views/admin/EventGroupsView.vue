@@ -92,7 +92,7 @@
                     @change="handleToggleConfirmed(group)"
                   />
                   <span
-                    class="text-xs"
+                    class="text-sm"
                     :class="{ 'text-base-content/30': group.needs_attention || !group.user }"
                   >
                     Confirmado
@@ -321,6 +321,7 @@ async function loadData() {
     ])
     event.value = eventData
     groups.value = groupsData
+    console.log(groups.value)
     availableGuides.value = guidesData
     bookings.value = bookingsData
     ungroupedBookings.value = bookingsData.filter((b) => b.group === null && b.status !== 'deleted')

@@ -53,6 +53,12 @@ export async function createUser(dto: CreateUserDto) {
   return response.data
 }
 
+// para que el usuario logueado actualice su propio perfil
+export async function updateSelf(dto: UpdateUserDto) {
+  const response = await api.patch('/users/me', dto)
+  return response.data
+}
+
 // para actualizar un usuario existente
 export async function updateUser(id: number, dto: UpdateUserDto) {
   const response = await api.patch<User>(`/users/${id}`, dto)

@@ -180,7 +180,7 @@ import { ref, onMounted } from 'vue'
 // para acceso a los datos del usuario logueado
 import { useAuthStore } from '@/stores/auth'
 // para las llamadas a la API
-import { updateUser, deleteSelf } from '@/api/users'
+import { updateSelf, deleteSelf } from '@/api/users'
 import api from '@/api/axios'
 // iconos
 import { Eye, EyeOff } from '@lucide/vue'
@@ -240,7 +240,7 @@ async function handleUpdateProfile() {
   }
   formLoading.value = true
   try {
-    await updateUser(authStore.user!.id, {
+    await updateSelf({
       name: form.value.name,
       email: form.value.email,
       phone: form.value.phone || null,
