@@ -42,10 +42,7 @@
         <TriangleAlert :size="24" class="text-error flex-shrink-0" />
         <div>
           <p class="font-bold text-error">Hay grupos que requieren atención</p>
-          <p class="text-sm text-base-content/70">
-            Uno o más grupos superan la capacidad del guía asignado. Ajusta la capacidad o reasigna
-            las reservas antes de confirmar.
-          </p>
+          <p class="text-sm text-base-content/70">{{ generateMessage }}</p>
         </div>
       </div>
 
@@ -170,8 +167,8 @@
               </option>
             </select>
 
-            <!-- ajuste manual de capacidad: solo si needs_attention -->
-            <div v-if="group.needs_attention">
+            <!-- ajuste manual de capacidad: solo si needs_attention Y hay guía asignado -->
+            <div v-if="group.needs_attention && group.user">
               <div v-if="adjustingCapacityGroupId === group.id" class="flex items-center gap-2">
                 <input
                   v-model.number="manualCapacity"
@@ -179,24 +176,28 @@
                   min="1"
                   class="input input-secondary w-24"
                 />
-                <button
-                  class="btn btn-gradient btn-sm text-white"
-                  @click="handleAdjustCapacity(group)"
-                >
+                <button class="btn btn-gradient text-white" @click="handleAdjustCapacity(group)">
                   Guardar
                 </button>
-                <button class="btn btn-ghost btn-sm" @click="adjustingCapacityGroupId = null">
-                  ✕
-                </button>
+                <button class="btn btn-ghost" @click="adjustingCapacityGroupId = null">✕</button>
               </div>
               <button
                 v-else
-                class="btn btn-sm text-error border border-error hover:bg-error/10 w-full gap-2"
+                class="btn text-error border border-error hover:bg-error/10 w-full gap-2"
                 @click="toggleCapacityForm(group.id, group.capacity)"
               >
                 <LocateFixed :size="14" />
                 Ajustar capacidad
               </button>
+            </div>
+
+            <!-- mensaje cuando no hay guía disponible -->
+            <div
+              v-if="group.needs_attention && !group.user"
+              class="flex items-center gap-1 text-sm text-error mt-1"
+            >
+              <TriangleAlert :size="14" />
+              Sin guías disponibles
             </div>
           </div>
 
@@ -284,6 +285,7 @@ const groups = ref<Group[]>([])
 const bookings = ref<Booking[]>([])
 const loading = ref(false)
 const error = ref('')
+const generateMessage = ref<string>('')
 
 // guías disponibles para este evento
 const availableGuides = ref<AvailableGuide[]>([])
@@ -349,6 +351,8 @@ async function handleGenerateGroups() {
     await deleteGroups(eventId)
     // generamos la propuesta
     const proposal = await generateGroups(eventId)
+    // guardamos el mensaje de error para el banner
+    generateMessage.value = proposal.message
     // guardamos los grupos propuestos en la BBDD como no confirmados
     await saveGroups({
       event_id: eventId,
