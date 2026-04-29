@@ -39,7 +39,7 @@
 
       <!-- warning de grupos con necesidad de atención -->
       <div v-if="groups.some((g) => !!g.needs_attention)" class="banner-warning">
-        <span class="text-2xl">⚠️</span>
+        <TriangleAlert :size="24" class="text-error flex-shrink-0" />
         <div>
           <p class="font-bold text-error">Hay grupos que requieren atención</p>
           <p class="text-sm text-base-content/70">
@@ -177,24 +177,25 @@
                   v-model.number="manualCapacity"
                   type="number"
                   min="1"
-                  class="input input-secondary input-xs w-20"
+                  class="input input-secondary w-24"
                 />
                 <button
-                  class="btn btn-gradient btn-xs text-white"
+                  class="btn btn-gradient btn-sm text-white"
                   @click="handleAdjustCapacity(group)"
                 >
                   Guardar
                 </button>
-                <button class="btn btn-ghost btn-xs" @click="adjustingCapacityGroupId = null">
+                <button class="btn btn-ghost btn-sm" @click="adjustingCapacityGroupId = null">
                   ✕
                 </button>
               </div>
               <button
                 v-else
-                class="btn btn-xs text-error border border-error hover:bg-error/10 w-full"
+                class="btn btn-sm text-error border border-error hover:bg-error/10 w-full gap-2"
                 @click="toggleCapacityForm(group.id, group.capacity)"
               >
-                ⚠️ Ajustar capacidad
+                <LocateFixed :size="14" />
+                Ajustar capacidad
               </button>
             </div>
           </div>
@@ -271,7 +272,7 @@ import BookingCard from '@/components/BookingCard.vue'
 // para el drag and drop
 import draggable from 'vuedraggable'
 // iconos
-import { Trash2 } from '@lucide/vue'
+import { Trash2, TriangleAlert, LocateFixed } from '@lucide/vue'
 
 const route = useRoute()
 // leemos el eventId de la URL (/admin/events/:eventId/groups)

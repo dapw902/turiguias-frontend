@@ -199,6 +199,8 @@ import flatpickr from 'flatpickr'
 import { Spanish } from 'flatpickr/dist/l10n/es'
 import 'flatpickr/dist/flatpickr.min.css'
 import type { Instance } from 'flatpickr/dist/types/instance'
+// para manejo de errores del back
+import { extractError } from '@/utils/errors'
 
 const route = useRoute()
 const router = useRouter()
@@ -378,15 +380,7 @@ async function handleSubmit() {
     showForm.value = false
     await loadData()
   } catch (e: unknown) {
-    const axiosError = e as { response?: { data?: { message?: string | string[] } } }
-    const backendMessage = axiosError?.response?.data?.message
-    if (Array.isArray(backendMessage)) {
-      formError.value = backendMessage[0] ?? 'Error al registrar la disponibilidad'
-    } else if (typeof backendMessage === 'string') {
-      formError.value = backendMessage
-    } else {
-      formError.value = 'Error al registrar la disponibilidad'
-    }
+    formError.value = extractError(e, 'Error al registrar la disponibilidad')
   } finally {
     formLoading.value = false
   }

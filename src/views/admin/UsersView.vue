@@ -113,6 +113,8 @@ import { useAuthStore } from '@/stores/auth'
 import { Trash2, Pencil, Info } from '@lucide/vue'
 // modal para creación y actualización de usuarios
 import UserModal from '@/components/UserModal.vue'
+// para manejo de errores del back
+import { extractError } from '@/utils/errors'
 
 const authStore = useAuthStore()
 
@@ -182,14 +184,13 @@ async function loadData() {
 // id del usuario que se está borrando, para mostrar spinner en su botón
 const deletingUserId = ref<number | null>(null)
 
-// para borrar a un usuario del listado
 async function handleDelete(id: number) {
   deletingUserId.value = id
   try {
     await deleteUser(id)
     await loadData()
-  } catch {
-    error.value = 'Error al borrar el usuario'
+  } catch (e: unknown) {
+    error.value = extractError(e, 'Error al borrar el usuario')
   } finally {
     deletingUserId.value = null
   }

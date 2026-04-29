@@ -63,3 +63,8 @@ export async function updateUser(id: number, dto: UpdateUserDto) {
 export async function deleteUser(id: number) {
   await api.delete(`/users/${id}`)
 }
+
+// para que el usuario logueado borre su propia cuenta
+export async function deleteSelf() {
+  await api.delete('/users/me')
+}

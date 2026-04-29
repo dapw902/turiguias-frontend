@@ -166,6 +166,8 @@ import { getServices, type Service } from '@/api/services'
 import { getUsers } from '@/api/users'
 // iconos
 import { Pencil, Trash2 } from '@lucide/vue'
+// para manejo de errores del back
+import { extractError } from '@/utils/errors'
 
 const route = useRoute()
 const router = useRouter()
@@ -282,15 +284,7 @@ async function handleSubmit() {
     closeModal()
     await loadData()
   } catch (e: unknown) {
-    const axiosError = e as { response?: { data?: { message?: string | string[] } } }
-    const backendMessage = axiosError?.response?.data?.message
-    if (Array.isArray(backendMessage)) {
-      formError.value = backendMessage[0] ?? 'Error al guardar el servicio'
-    } else if (typeof backendMessage === 'string') {
-      formError.value = backendMessage
-    } else {
-      formError.value = 'Error al guardar el servicio'
-    }
+    formError.value = extractError(e, 'Error al guardar el servicio')
   } finally {
     formLoading.value = false
   }

@@ -156,6 +156,7 @@ const pageTitle = computed(() => {
   if (route.path.includes('/groups') && route.path.includes('/bookings'))
     return 'Listado de reservas'
   if (route.path.includes('/groups')) return 'Mis grupos'
+  if (route.path.includes('/account')) return 'Mi cuenta'
   return ''
 })
 </script>

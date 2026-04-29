@@ -150,6 +150,7 @@ const pageTitle = computed(() => {
   if (route.path.includes('/guides') && route.path.includes('/groups')) return 'Grupos'
   if (route.path.includes('/guides')) return 'Guías'
   if (route.path.includes('/users')) return 'Usuarios'
+  if (route.path.includes('/account')) return 'Mi cuenta'
   return ''
 })
 </script>

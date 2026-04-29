@@ -94,6 +94,8 @@ import {
   type CreateUserDto,
   type UpdateUserDto,
 } from '@/api/users'
+// para manejo de errores del back
+import { extractError } from '@/utils/errors'
 
 // props que recibe el componente
 const props = defineProps<{
@@ -147,6 +149,24 @@ watch(
   },
 )
 
+// cuando el modal se abre para crear nuevo usuario, reseteamos el formulario
+watch(
+  () => props.show,
+  (newShow) => {
+    if (newShow && !props.user) {
+      form.value = {
+        name: '',
+        email: '',
+        password: '',
+        role: 'guide',
+        phone: undefined,
+        notes: undefined,
+      }
+      formError.value = ''
+    }
+  },
+)
+
 // para crear o editar un usuario
 async function handleSubmit() {
   formError.value = ''
@@ -181,17 +201,10 @@ async function handleSubmit() {
     // avisamos al padre que se guardó para que recargue
     emit('saved')
   } catch (e: unknown) {
-    const axiosError = e as { response?: { data?: { message?: string | string[] } } }
-    const backendMessage = axiosError?.response?.data?.message
-    if (Array.isArray(backendMessage)) {
-      formError.value =
-        backendMessage[0] ??
-        (props.user ? 'Error al actualizar el usuario' : 'Error al crear el usuario')
-    } else if (typeof backendMessage === 'string') {
-      formError.value = backendMessage
-    } else {
-      formError.value = props.user ? 'Error al actualizar el usuario' : 'Error al crear el usuario'
-    }
+    formError.value = extractError(
+      e,
+      props.user ? 'Error al actualizar el usuario' : 'Error al crear el usuario',
+    )
   } finally {
     formLoading.value = false
   }
