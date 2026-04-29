@@ -162,3 +162,20 @@ export async function getBookingsByGroup(groupId: number) {
   const response = await api.get<GroupWithBookings>(`/groups/${groupId}/bookings`)
   return response.data
 }
+
+// interfaz para una notificación de grupo con needs_attention
+export interface GroupAttention {
+  group_id: number
+  event_id: number
+  event_time: number
+  service_name: string
+  service_timezone: string
+  turitop_product_id: string
+  reason: 'capacity' | 'no_guide'
+}
+
+// para obtener los grupos con needs_attention para el panel de notificaciones
+export async function getGroupsWithAttention() {
+  const response = await api.get<GroupAttention[]>('/groups/attention')
+  return response.data
+}

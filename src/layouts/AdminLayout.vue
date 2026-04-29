@@ -95,6 +95,8 @@
 
         <!-- iconos mini-menu  -->
         <div class="flex items-center bg-base-100 rounded-full px-3 py-1 gap-2 shadow-sm">
+          <!-- campana de alertas -->
+          <AttentionBell />
           <!-- mi cuenta -->
           <button
             class="btn btn-ghost btn-xs btn-circle"
@@ -130,6 +132,8 @@ import { computed, ref } from 'vue'
 import { LogOut, ChevronsRight, ChevronsLeft, Eclipse, Sun, UserCircle } from '@lucide/vue'
 // para las redirecciones y títulos de las páginas
 import { useRouter, useRoute } from 'vue-router'
+// para la campana de atención
+import AttentionBell from '@/components/AttentionBell.vue'
 
 const sidebarOpen = ref(true)
 
