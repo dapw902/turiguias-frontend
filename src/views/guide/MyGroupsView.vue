@@ -49,12 +49,12 @@
                   </span>
                 </td>
                 <td class="text-right">
-                  <button
+                  <RouterLink
+                    :to="`/guide/groups/${group.group_id}/bookings`"
                     class="btn btn-ghost btn-xs"
-                    @click="router.push(`/guide/groups/${group.group_id}/bookings`)"
                   >
                     <Eye :size="14" />
-                  </button>
+                  </RouterLink>
                 </td>
               </tr>
             </tbody>
@@ -96,12 +96,12 @@
                   </span>
                 </td>
                 <td class="text-right">
-                  <button
+                  <RouterLink
+                    :to="`/guide/groups/${group.group_id}/bookings`"
                     class="btn btn-ghost btn-xs"
-                    @click="router.push(`/guide/groups/${group.group_id}/bookings`)"
                   >
                     <Eye :size="14" />
-                  </button>
+                  </RouterLink>
                 </td>
               </tr>
             </tbody>
@@ -149,12 +149,8 @@ import { DateTime } from 'luxon'
 import { Eye } from '@lucide/vue'
 // para identficar al guía logueado
 import { useAuthStore } from '@/stores/auth'
-// para navegación
-import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
-
-const router = useRouter()
 
 // ESTADO
 const guideName = authStore.user?.name

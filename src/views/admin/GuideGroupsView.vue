@@ -23,18 +23,17 @@
 
       <!-- navegación entre subvistas del guía -->
       <div class="flex gap-2 mb-6 justify-center">
-        <button
-          class="btn btn-outline-gradient"
-          @click="router.push(`/admin/guides/${guideId}/availability`)"
-        >
+        <RouterLink :to="`/admin/guides/${guideId}/availability`" class="btn btn-outline-gradient">
+          <CalendarCheck :size="14" style="color: var(--color-primary)" />
           Horarios
-        </button>
-        <button
-          class="btn btn-outline-gradient"
-          @click="router.push(`/admin/guides/${guideId}/services`)"
+        </RouterLink>
+        <RouterLink
+          :to="`/admin/guides/${guideId}/services`"
+          class="btn btn-outline-gradient gap-2"
         >
+          <ListCheck :size="14" style="color: var(--color-primary)" />
           Servicios
-        </button>
+        </RouterLink>
       </div>
 
       <!-- grupos activos y futuros -->
@@ -73,12 +72,12 @@
                   </span>
                 </td>
                 <td class="text-right">
-                  <button
+                  <RouterLink
+                    :to="`/admin/events/${group.event_id}/groups`"
                     class="btn btn-ghost btn-xs"
-                    @click="router.push(`/admin/events/${group.event_id}/groups`)"
                   >
                     <Eye :size="14" />
-                  </button>
+                  </RouterLink>
                 </td>
               </tr>
             </tbody>
@@ -128,12 +127,12 @@
                   </span>
                 </td>
                 <td class="text-right">
-                  <button
+                  <RouterLink
+                    :to="`/admin/events/${group.event_id}/groups`"
                     class="btn btn-ghost btn-xs"
-                    @click="router.push(`/admin/events/${group.event_id}/groups`)"
                   >
                     <Eye :size="14" />
-                  </button>
+                  </RouterLink>
                 </td>
               </tr>
             </tbody>
@@ -174,7 +173,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 // para acceso a los parámetros de la URL
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 // importamos las funciones e interfaces necesarias
 import { getGroupsByGuide, type GuideGroup } from '@/api/groups'
 // para obtener el nombre del guía
@@ -182,10 +181,10 @@ import { getUsers } from '@/api/users'
 // para conversión de fechas
 import { DateTime } from 'luxon'
 // iconos
-import { Eye } from '@lucide/vue'
+import { Eye, CalendarCheck, ListCheck } from '@lucide/vue'
 
 const route = useRoute()
-const router = useRouter()
+
 // leemos el guideId de la URL (/admin/guides/:guideId/groups)
 const guideId = parseInt(route.params.guideId as string)
 

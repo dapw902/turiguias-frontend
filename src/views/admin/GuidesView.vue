@@ -63,7 +63,6 @@
           </div>
 
           <!-- servicios asignados -->
-          <!-- servicios asignados -->
           <div class="flex-1">
             <p class="text-xs text-base-content/60 font-medium mb-1">Servicios</p>
             <div v-if="getServicesForGuide(guide.id).length > 0" class="flex flex-col gap-1">
@@ -86,27 +85,27 @@
 
           <!-- botones de acceso a subvistas — en vertical -->
           <div class="flex flex-col gap-2">
-            <button
+            <RouterLink
+              :to="`/admin/guides/${guide.id}/availability`"
               class="btn btn-outline-gradient w-full gap-2"
-              @click="router.push(`/admin/guides/${guide.id}/availability`)"
             >
               <Clock :size="14" />
               Horarios
-            </button>
-            <button
+            </RouterLink>
+            <RouterLink
+              :to="`/admin/guides/${guide.id}/services`"
               class="btn btn-outline-gradient w-full gap-2"
-              @click="router.push(`/admin/guides/${guide.id}/services`)"
             >
               <Briefcase :size="14" />
               Servicios
-            </button>
-            <button
+            </RouterLink>
+            <RouterLink
+              :to="`/admin/guides/${guide.id}/groups`"
               class="btn btn-outline-gradient w-full gap-2"
-              @click="router.push(`/admin/guides/${guide.id}/groups`)"
             >
               <Users :size="14" />
               Grupos
-            </button>
+            </RouterLink>
           </div>
         </div>
       </div>
@@ -126,13 +125,9 @@ import { getGuides, type User } from '@/api/users'
 import { getGuideServices, type GuideServiceByUser } from '@/api/guide-services'
 // iconos
 import { Clock, Briefcase, Users } from '@lucide/vue'
-// para navegar a las subvistas del guía
-import { useRouter } from 'vue-router'
 // para el filtro por servicios
 import VueSelect from 'vue-select'
 import { getServices, type Service } from '@/api/services'
-
-const router = useRouter()
 
 // ESTADO
 const guides = ref<User[]>([])

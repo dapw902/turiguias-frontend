@@ -40,7 +40,14 @@
 
       <!-- acciones -->
       <div class="flex justify-center gap-2">
-        <button class="btn font-normal btn-gradient" @click="goToGroups()">Ver grupos</button>
+        <RouterLink
+          v-if="event"
+          :to="`/admin/events/${event.id}/groups`"
+          class="btn font-normal btn-gradient"
+          @click="emit('close')"
+        >
+          Ver grupos
+        </RouterLink>
       </div>
     </div>
     <!-- fondo oscuro que cierra el modal al hacer clic -->
@@ -53,16 +60,12 @@
 <script setup lang="ts">
 // importamos la interfaz tipo Event de la API
 import type { Event } from '@/api/events'
-// para navegar a la vista de grupos
-import { useRouter } from 'vue-router'
 // importamos ref y watch
 import { ref, watch } from 'vue'
 // importamos la función e interfz de grupos
 import { getGroupsByEvent, type Group } from '@/api/groups'
 // importamos la función e interfaz de reservas
 import { getBookingsByEvent, type Booking } from '@/api/bookings'
-
-const router = useRouter()
 
 // props que recibe el componente
 const props = defineProps<{
@@ -115,12 +118,4 @@ watch(
     }
   },
 )
-
-// función para ir a la vista de grupos del evento
-function goToGroups() {
-  if (props.event) {
-    router.push(`/admin/events/${props.event.id}/groups`)
-    emit('close')
-  }
-}
 </script>

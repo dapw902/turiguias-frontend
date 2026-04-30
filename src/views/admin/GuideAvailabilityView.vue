@@ -24,18 +24,17 @@
 
       <!-- navegación entre subvistas del guía -->
       <div class="flex gap-2 mb-6 justify-center">
-        <button
-          class="btn btn-outline-gradient"
-          @click="router.push(`/admin/guides/${guideId}/services`)"
+        <RouterLink
+          :to="`/admin/guides/${guideId}/services`"
+          class="btn btn-outline-gradient gap-2"
         >
+          <ListCheck :size="14" style="color: var(--color-primary)" />
           Servicios
-        </button>
-        <button
-          class="btn btn-outline-gradient"
-          @click="router.push(`/admin/guides/${guideId}/groups`)"
-        >
+        </RouterLink>
+        <RouterLink :to="`/admin/guides/${guideId}/groups`" class="btn btn-outline-gradient gap-2">
+          <BookOpenCheck :size="14" style="color: var(--color-primary)" />
           Grupos
-        </button>
+        </RouterLink>
       </div>
 
       <!-- formulario de nueva disponibilidad -->
@@ -184,7 +183,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 // para acceso a los parámetros de la URL y navegación
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 // importamos FullCalendar y los plugins necesarios
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -205,7 +204,7 @@ import { getUsers } from '@/api/users'
 // para conversión de fechas
 import { DateTime } from 'luxon'
 // iconos
-import { Trash2 } from '@lucide/vue'
+import { Trash2, BookOpenCheck, ListCheck } from '@lucide/vue'
 // para el selector de las fechas
 import flatpickr from 'flatpickr'
 import { Spanish } from 'flatpickr/dist/l10n/es'
@@ -219,7 +218,6 @@ import { useSuccessMessages } from '@/stores/successMessages'
 import ForceDeleteAvailabilityModal from '@/components/ForceDeleteAvailabilityModal.vue'
 
 const route = useRoute()
-const router = useRouter()
 const successMessages = useSuccessMessages()
 
 // leemos el guideId de la URL (/admin/guides/:guideId/availability)

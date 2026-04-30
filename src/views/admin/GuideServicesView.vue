@@ -23,20 +23,16 @@
           Asignar servicio
         </button>
       </div>
-
+      <!-- navegación entre subvistas del guía -->
       <div class="flex gap-2 mb-6 justify-center">
-        <button
-          class="btn btn-outline-gradient"
-          @click="router.push(`/admin/guides/${guideId}/availability`)"
-        >
+        <RouterLink :to="`/admin/guides/${guideId}/availability`" class="btn btn-outline-gradient">
+          <CalendarCheck :size="14" style="color: var(--color-primary)" />
           Horarios
-        </button>
-        <button
-          class="btn btn-outline-gradient"
-          @click="router.push(`/admin/guides/${guideId}/groups`)"
-        >
+        </RouterLink>
+        <RouterLink :to="`/admin/guides/${guideId}/groups`" class="btn btn-outline-gradient">
+          <BookOpenCheck :size="14" style="color: var(--color-primary)" />
           Grupos
-        </button>
+        </RouterLink>
       </div>
 
       <!-- tabla de servicios asignados -->
@@ -151,7 +147,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 // para acceso a los parámetros de la URL
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 // importamos las funciones e interfaces necesarias
 import {
   getGuideServicesByUser,
@@ -165,14 +161,14 @@ import { getServices, type Service } from '@/api/services'
 // para recuperar el listado de usuarios
 import { getUsers } from '@/api/users'
 // iconos
-import { Pencil, Trash2 } from '@lucide/vue'
+import { Pencil, Trash2, CalendarCheck, BookOpenCheck } from '@lucide/vue'
 // para manejo de errores del back
 import { extractError } from '@/utils/errors'
 // store para mensajes de éxito
 import { useSuccessMessages } from '@/stores/successMessages'
 
 const route = useRoute()
-const router = useRouter()
+
 const successMessages = useSuccessMessages()
 
 // leemos el guideId de la URL (/admin/guides/:guideId/services)
