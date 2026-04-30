@@ -39,6 +39,6 @@ export async function createAvailability(dto: CreateAvailabilityDto) {
 }
 
 // para borrar una franja de disponibilidad
-export async function deleteAvailability(id: number) {
-  await api.delete(`/guide-availability/${id}`)
+export async function deleteAvailability(id: number, force = false) {
+  await api.delete(`/guide-availability/${id}`, { params: { force: force || undefined } })
 }

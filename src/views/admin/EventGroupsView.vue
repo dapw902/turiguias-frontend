@@ -321,7 +321,6 @@ async function loadData() {
     ])
     event.value = eventData
     groups.value = groupsData
-    console.log(groups.value)
     availableGuides.value = guidesData
     bookings.value = bookingsData
     ungroupedBookings.value = bookingsData.filter((b) => b.group === null && b.status !== 'deleted')

@@ -14,15 +14,6 @@
 <script setup lang="ts">
 import { useSuccessMessages } from '@/stores/successMessages'
 import { CircleCheck } from '@lucide/vue'
-import { watch } from 'vue'
 
 const store = useSuccessMessages()
-
-watch(
-  () => store.messages,
-  (val) => {
-    console.log('messages changed:', val)
-  },
-  { deep: true },
-)
 </script>

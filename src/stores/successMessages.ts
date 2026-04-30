@@ -6,7 +6,6 @@ export const useSuccessMessages = defineStore('successMessages', () => {
   let nextId = 0
 
   function show(text: string, duration = 3000) {
-    console.log('successMessages.show called:', text)
     const id = nextId++
     messages.value.push({ id, text })
     setTimeout(() => {

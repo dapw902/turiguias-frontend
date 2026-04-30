@@ -39,53 +39,57 @@
       </div>
 
       <!-- formulario de nueva disponibilidad -->
-      <div v-if="showForm" class="bg-base-100 rounded-xl p-4 shadow-sm mb-4">
+      <div v-if="showForm" class="bg-base-100 rounded-xl p-4 shadow-sm mb-4 max-w-lg mx-auto">
         <h3 class="font-bold text-sm mb-3">Nueva franja de disponibilidad</h3>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="form-control">
-            <label class="label pb-1"
-              ><span class="label-text font-medium">Fecha inicio *</span></label
+        <div class="flex flex-col gap-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="form-control">
+              <label class="label pb-1"
+                ><span class="label-text font-medium">Fecha inicio *</span></label
+              >
+              <input
+                ref="startDateInput"
+                type="text"
+                class="input input-secondary w-full"
+                placeholder="dd/mm/yyyy"
+              />
+            </div>
+            <div class="form-control">
+              <label class="label pb-1"
+                ><span class="label-text font-medium">Fecha fin *</span></label
+              >
+              <input
+                ref="endDateInput"
+                type="text"
+                class="input input-secondary w-full"
+                placeholder="dd/mm/yyyy"
+              />
+            </div>
+            <div class="form-control">
+              <label class="label pb-1"
+                ><span class="label-text font-medium">Hora inicio *</span></label
+              >
+              <input v-model="form.start_time" type="time" class="input input-secondary w-full" />
+            </div>
+            <div class="form-control">
+              <label class="label pb-1"
+                ><span class="label-text font-medium">Hora fin *</span></label
+              >
+              <input v-model="form.end_time" type="time" class="input input-secondary w-full" />
+            </div>
+          </div>
+          <p v-if="formError" class="text-error text-sm">{{ formError }}</p>
+          <div class="flex justify-end gap-2">
+            <button class="btn btn-outline-gradient" @click="showForm = false">Cancelar</button>
+            <button
+              class="btn btn-gradient text-white"
+              :disabled="formLoading"
+              @click="handleSubmit"
             >
-            <input
-              ref="startDateInput"
-              type="text"
-              class="input input-secondary w-full"
-              placeholder="dd/mm/yyyy"
-            />
+              <span v-if="formLoading" class="loading loading-spinner loading-sm"></span>
+              <span v-else>Guardar</span>
+            </button>
           </div>
-          <div class="form-control">
-            <label class="label pb-1"
-              ><span class="label-text font-medium">Fecha fin *</span></label
-            >
-            <input
-              ref="endDateInput"
-              type="text"
-              class="input input-secondary w-full"
-              placeholder="dd/mm/yyyy"
-            />
-          </div>
-          <div class="form-control">
-            <label class="label pb-1"
-              ><span class="label-text font-medium">Hora inicio *</span></label
-            >
-            <input v-model="form.start_time" type="time" class="input input-secondary w-full" />
-          </div>
-          <div class="form-control">
-            <label class="label pb-1"><span class="label-text font-medium">Hora fin *</span></label>
-            <input v-model="form.end_time" type="time" class="input input-secondary w-full" />
-          </div>
-        </div>
-
-        <!-- mensaje de error del formulario -->
-        <p v-if="formError" class="text-error text-sm mt-3">{{ formError }}</p>
-
-        <!-- botones -->
-        <div class="flex justify-end gap-2 mt-4">
-          <button class="btn btn-outline-gradient" @click="showForm = false">Cancelar</button>
-          <button class="btn btn-gradient text-white" :disabled="formLoading" @click="handleSubmit">
-            <span v-if="formLoading" class="loading loading-spinner loading-sm"></span>
-            <span v-else>Guardar</span>
-          </button>
         </div>
       </div>
 
@@ -166,6 +170,14 @@
         </div>
       </div>
     </div>
+    <!-- modal de confirmación de borrado con grupos afectados -->
+    <ForceDeleteAvailabilityModal
+      :show="showForceDeleteConfirm"
+      :affected-groups-count="affectedGroupsCount"
+      :loading="!!deletingId"
+      @confirm="handleForceDelete"
+      @cancel="showForceDeleteConfirm = false"
+    />
   </div>
 </template>
 
@@ -203,6 +215,8 @@ import type { Instance } from 'flatpickr/dist/types/instance'
 import { extractError } from '@/utils/errors'
 // store para mensajes de éxito
 import { useSuccessMessages } from '@/stores/successMessages'
+// modal para la reconfirmación de borrado de horarios con grupos
+import ForceDeleteAvailabilityModal from '@/components/ForceDeleteAvailabilityModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -261,6 +275,11 @@ const calendarOptions = ref<CalendarOptions>({
   },
   displayEventTime: false,
 })
+
+// ESTADO — modal confirmación borrado con grupos afectados
+const showForceDeleteConfirm = ref(false)
+const forceDeleteId = ref<number | null>(null)
+const affectedGroupsCount = ref(0)
 
 // HELPERS
 
@@ -346,6 +365,7 @@ async function loadData() {
 }
 
 // CREAR DISPONIBILIDAD
+// función para registrar nuevos horarios
 async function handleSubmit() {
   formError.value = ''
 
@@ -381,7 +401,6 @@ async function handleSubmit() {
     // reseteamos el formulario y recargamos
     form.value = { start_date: '', end_date: '', start_time: '', end_time: '' }
     showForm.value = false
-    console.log('about to show success message')
     successMessages.show('Disponibilidad registrada correctamente')
     await loadData()
   } catch (e: unknown) {
@@ -392,6 +411,7 @@ async function handleSubmit() {
 }
 
 // BORRAR DISPONIBILIDAD
+// función para borrar horarios. Si tiene grupos existentes, detecta el error 409 y muestra un modal de reconfirmación
 const deletingId = ref<number | null>(null)
 
 async function handleDelete(id: number) {
@@ -400,6 +420,35 @@ async function handleDelete(id: number) {
     await deleteAvailability(id)
     await loadData()
     successMessages.show('Disponibilidad eliminada correctamente')
+  } catch (e: unknown) {
+    const err = e as {
+      response?: { data?: { statusCode?: number; message?: string; affectedGroups?: number } }
+    }
+    if (err?.response?.data?.statusCode === 409) {
+      // si hay grupos afectados, mostramos el modal de confirmación
+      forceDeleteId.value = id
+      affectedGroupsCount.value = err?.response?.data?.affectedGroups ?? 0
+      showForceDeleteConfirm.value = true
+    } else {
+      error.value = extractError(e, 'Error al borrar la disponibilidad')
+    }
+  } finally {
+    deletingId.value = null
+  }
+}
+
+// para borrar la disponibilidad ignorando los grupos afectados
+async function handleForceDelete() {
+  if (!forceDeleteId.value) return
+  deletingId.value = forceDeleteId.value
+  try {
+    await deleteAvailability(forceDeleteId.value, true)
+    showForceDeleteConfirm.value = false
+    forceDeleteId.value = null
+    await loadData()
+    successMessages.show(
+      'Disponibilidad eliminada. Los grupos afectados han sido marcados para revisión.',
+    )
   } catch {
     error.value = 'Error al borrar la disponibilidad'
   } finally {
