@@ -168,9 +168,12 @@ import { getUsers } from '@/api/users'
 import { Pencil, Trash2 } from '@lucide/vue'
 // para manejo de errores del back
 import { extractError } from '@/utils/errors'
+// store para mensajes de éxito
+import { useSuccessMessages } from '@/stores/successMessages'
 
 const route = useRoute()
 const router = useRouter()
+const successMessages = useSuccessMessages()
 
 // leemos el guideId de la URL (/admin/guides/:guideId/services)
 const guideId = parseInt(route.params.guideId as string)
@@ -282,6 +285,11 @@ async function handleSubmit() {
       })
     }
     closeModal()
+    successMessages.show(
+      editingService.value
+        ? 'Servicio actualizado correctamente'
+        : 'Servicio asignado correctamente',
+    )
     await loadData()
   } catch (e: unknown) {
     formError.value = extractError(e, 'Error al guardar el servicio')
@@ -298,6 +306,7 @@ async function handleDelete(id: number) {
   try {
     await deleteGuideService(id)
     await loadData()
+    successMessages.show('Servicio eliminado correctamente')
   } catch {
     error.value = 'Error al borrar el servicio'
   } finally {

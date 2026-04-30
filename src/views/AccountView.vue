@@ -36,7 +36,6 @@
 
       <!-- mensaje de error o éxito -->
       <p v-if="formError" class="text-error text-sm mt-3">{{ formError }}</p>
-      <p v-if="formSuccess" class="text-success text-sm mt-3">{{ formSuccess }}</p>
 
       <div class="flex justify-end mt-4">
         <button
@@ -122,7 +121,6 @@
 
       <!-- mensaje de error o éxito -->
       <p v-if="passwordError" class="text-error text-sm mt-3">{{ passwordError }}</p>
-      <p v-if="passwordSuccess" class="text-success text-sm mt-3">{{ passwordSuccess }}</p>
 
       <div class="flex justify-end mt-4">
         <button
@@ -186,8 +184,11 @@ import api from '@/api/axios'
 import { Eye, EyeOff } from '@lucide/vue'
 // para manejo de errores del back
 import { extractError } from '@/utils/errors'
+// store para mensajes de éxito
+import { useSuccessMessages } from '@/stores/successMessages'
 
 const authStore = useAuthStore()
+const successMessages = useSuccessMessages()
 
 // ESTADO — datos de perfil
 const form = ref({
@@ -198,7 +199,6 @@ const form = ref({
 })
 const formLoading = ref(false)
 const formError = ref<string>('')
-const formSuccess = ref<string>('')
 
 // ESTADO — contraseña
 const passwordForm = ref({
@@ -211,7 +211,6 @@ const showNew = ref(false)
 const showConfirm = ref(false)
 const passwordLoading = ref(false)
 const passwordError = ref<string>('')
-const passwordSuccess = ref<string>('')
 
 // ESTADO — borrado cuenta
 const deleteLoading = ref(false)
@@ -233,7 +232,6 @@ function initForm() {
 // ACTUALIZAR PERFIL
 async function handleUpdateProfile() {
   formError.value = ''
-  formSuccess.value = ''
   if (!form.value.name || !form.value.email) {
     formError.value = 'Nombre y email son obligatorios'
     return
@@ -248,7 +246,7 @@ async function handleUpdateProfile() {
     })
     // actualizamos el store con los nuevos datos
     await authStore.fetchCurrentUser()
-    formSuccess.value = 'Perfil actualizado correctamente'
+    successMessages.show('Perfil actualizado correctamente')
   } catch (e: unknown) {
     formError.value = extractError(e, 'Error al actualizar el perfil')
   } finally {
@@ -259,7 +257,6 @@ async function handleUpdateProfile() {
 // CAMBIAR CONTRASEÑA
 async function handleChangePassword() {
   passwordError.value = ''
-  passwordSuccess.value = ''
   if (
     !passwordForm.value.current_password ||
     !passwordForm.value.new_password ||
@@ -283,7 +280,7 @@ async function handleChangePassword() {
       new_password: passwordForm.value.new_password,
     })
     passwordForm.value = { current_password: '', new_password: '', confirm_password: '' }
-    passwordSuccess.value = 'Contraseña actualizada correctamente'
+    successMessages.show('Contraseña actualizada correctamente')
   } catch (e: unknown) {
     passwordError.value = extractError(e, 'La contraseña actual no es correcta')
   } finally {

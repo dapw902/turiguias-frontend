@@ -201,9 +201,12 @@ import 'flatpickr/dist/flatpickr.min.css'
 import type { Instance } from 'flatpickr/dist/types/instance'
 // para manejo de errores del back
 import { extractError } from '@/utils/errors'
+// store para mensajes de éxito
+import { useSuccessMessages } from '@/stores/successMessages'
 
 const route = useRoute()
 const router = useRouter()
+const successMessages = useSuccessMessages()
 
 // leemos el guideId de la URL (/admin/guides/:guideId/availability)
 const guideId = parseInt(route.params.guideId as string)
@@ -378,6 +381,8 @@ async function handleSubmit() {
     // reseteamos el formulario y recargamos
     form.value = { start_date: '', end_date: '', start_time: '', end_time: '' }
     showForm.value = false
+    console.log('about to show success message')
+    successMessages.show('Disponibilidad registrada correctamente')
     await loadData()
   } catch (e: unknown) {
     formError.value = extractError(e, 'Error al registrar la disponibilidad')
@@ -394,6 +399,7 @@ async function handleDelete(id: number) {
   try {
     await deleteAvailability(id)
     await loadData()
+    successMessages.show('Disponibilidad eliminada correctamente')
   } catch {
     error.value = 'Error al borrar la disponibilidad'
   } finally {

@@ -115,8 +115,11 @@ import { Trash2, Pencil, Info } from '@lucide/vue'
 import UserModal from '@/components/UserModal.vue'
 // para manejo de errores del back
 import { extractError } from '@/utils/errors'
+// store para mensajes de éxito
+import { useSuccessMessages } from '@/stores/successMessages'
 
 const authStore = useAuthStore()
+const successMessages = useSuccessMessages()
 
 // ESTADO
 const users = ref<User[]>([])
@@ -165,6 +168,9 @@ function closeModal() {
 function onUserSaved() {
   closeModal()
   loadData()
+  successMessages.show(
+    editingUser.value ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente',
+  )
 }
 
 // CARGA DE DATOS
@@ -189,6 +195,7 @@ async function handleDelete(id: number) {
   try {
     await deleteUser(id)
     await loadData()
+    successMessages.show('Usuario eliminado correctamente')
   } catch (e: unknown) {
     error.value = extractError(e, 'Error al borrar el usuario')
   } finally {
