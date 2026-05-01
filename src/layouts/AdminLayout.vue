@@ -2,7 +2,7 @@
   <div class="flex h-screen overflow-hidden">
     <!-- navbar lateral -->
     <aside
-      class="flex flex-col transition-all duration-300"
+      class="flex flex-col transition-all duration-300 fixed lg:relative z-40 lg:z-auto h-full lg:h-auto"
       :class="sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'"
       style="background-color: var(--color-primary)"
     >
@@ -75,7 +75,12 @@
         </button>
       </div>
     </aside>
-
+    <!-- overlay oscuro en móvil cuando el aside está abierto -->
+    <div
+      v-if="sidebarOpen"
+      class="fixed inset-0 bg-black/40 z-30 lg:hidden"
+      @click="sidebarOpen = false"
+    />
     <!-- contenido principal -->
     <div class="flex flex-col flex-1 overflow-hidden">
       <!-- topbar -->
@@ -114,7 +119,7 @@
       </header>
 
       <!-- vista actual -->
-      <main class="flex-1 overflow-y-auto p-6 bg-base-200">
+      <main class="flex-1 overflow-y-auto p-2 lg:p-6 bg-base-200">
         <RouterView />
       </main>
     </div>
@@ -135,7 +140,8 @@ import { useRouter, useRoute } from 'vue-router'
 // para la campana de atención
 import AttentionBell from '@/components/AttentionBell.vue'
 
-const sidebarOpen = ref(true)
+// en móvil el aside empieza cerrado, en desktop abierto
+const sidebarOpen = ref(window.innerWidth >= 1024)
 
 const authStore = useAuthStore()
 

@@ -49,6 +49,7 @@
               <input
                 ref="startDateInput"
                 type="text"
+                readonly
                 class="input input-secondary w-full"
                 placeholder="dd/mm/yyyy"
               />
@@ -60,6 +61,7 @@
               <input
                 ref="endDateInput"
                 type="text"
+                readonly
                 class="input input-secondary w-full"
                 placeholder="dd/mm/yyyy"
               />
@@ -93,9 +95,9 @@
       </div>
 
       <!-- listado de franjas + calendario -->
-      <div class="grid grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <!-- listado de horarios -->
-        <div class="bg-base-100 rounded-xl p-4 shadow-sm col-span-1 flex flex-col gap-4">
+        <div class="bg-base-100 rounded-xl p-4 shadow-sm lg:col-span-1 flex flex-col gap-4">
           <!-- horarios activos -->
           <div>
             <p class="font-bold text-sm mb-3">Horarios registrados</p>
@@ -164,7 +166,7 @@
         </div>
 
         <!-- calendario -->
-        <div class="bg-base-100 rounded-xl p-4 shadow-sm col-span-3">
+        <div class="bg-base-100 rounded-xl p-4 shadow-sm lg:col-span-3 availability-calendar">
           <FullCalendar :options="calendarOptions" />
         </div>
       </div>
@@ -256,12 +258,12 @@ const formLoading = ref(false)
 // CALENDARIO
 const calendarOptions = ref<CalendarOptions>({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  initialView: 'timeGridWeek',
+  initialView: 'dayGridMonth',
   locale: 'es',
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: 'dayGridMonth,timeGridWeek,timeGridDay',
+    right: 'dayGridMonth',
   },
   height: 'auto',
   timeZone: 'UTC',
@@ -307,7 +309,7 @@ function buildCalendarEvents() {
 
       events.push({
         id: `${a.id}-${dateStr}`,
-        title: `${localStart} — ${localEnd}`,
+        title: `${localStart} - ${localEnd}`,
         start: `${dateStr}T${a.start_time}:00`,
         end: `${dateStr}T${a.end_time}:00`,
         backgroundColor: isPast ? '#9ca3af' : '#2eac66',
@@ -469,6 +471,7 @@ watch(showForm, (val) => {
         fpStart = flatpickr(startDateInput.value, {
           locale: Spanish,
           dateFormat: 'Y-m-d',
+          disableMobile: true,
           onChange: (_, dateStr) => {
             form.value.start_date = dateStr
           },
@@ -478,6 +481,7 @@ watch(showForm, (val) => {
         fpEnd = flatpickr(endDateInput.value, {
           locale: Spanish,
           dateFormat: 'Y-m-d',
+          disableMobile: true,
           onChange: (_, dateStr) => {
             form.value.end_date = dateStr
           },

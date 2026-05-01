@@ -11,9 +11,9 @@
     </div>
 
     <!-- calendario (siempre montado) -->
-    <div class="bg-base-100 rounded-xl p-4 shadow-sm relative">
+    <div class="bg-base-100 rounded-xl p-2 lg:p-4 shadow-sm relative events-calendar">
       <!-- filtros por servicio -->
-      <div class="mb-4 flex items-center gap-3 flex-wrap">
+      <div class="mb-4 flex flex-col lg:flex-row lg:items-center gap-3">
         <label class="text-sm font-medium" for="service-filter">Filtrar por servicio:</label>
         <VueSelect
           v-model="selectedServiceId"
@@ -22,7 +22,7 @@
           label="name"
           placeholder="Todos los servicios"
           @update:modelValue="loadEvents()"
-          class="w-64"
+          class="w-full lg:w-64"
         >
           <template #option="{ turitop_product_id, name }">
             {{ turitop_product_id }} — {{ name }}
@@ -85,16 +85,35 @@ function toCalendarEvent(event: Event): EventInput {
 
 const calendarOptions = ref<CalendarOptions>({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-  initialView: 'timeGridWeek',
+  initialView: window.innerWidth < 1024 ? 'timeGridDay' : 'timeGridWeek',
   locale: 'es',
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: 'dayGridMonth,timeGridWeek,timeGridDay',
+    right:
+      window.innerWidth < 1024
+        ? 'timeGridDay,dayGridMonth'
+        : 'dayGridMonth,timeGridWeek,timeGridDay',
   },
   eventClick: handleEventClick,
   height: 'auto',
   timeZone: 'UTC',
+  eventDidMount: (info) => {
+    const event = info.event.extendedProps['event'] as Event
+    const viewType = info.view.type
+    const isMobile = window.innerWidth < 1024
+
+    if (isMobile && viewType === 'dayGridMonth') {
+      info.event.setProp('title', `${event.service.turitop_product_id}`)
+    } else if (isMobile && viewType === 'timeGridDay') {
+      info.event.setProp('title', `${event.service.turitop_product_id} - ${event.service.name}`)
+    } else {
+      info.event.setProp(
+        'title',
+        `${event.service.turitop_product_id} - ${event.service.name} (${event.totalPax} pax)`,
+      )
+    }
+  },
 })
 
 // FILTRO POR SERVICIOS

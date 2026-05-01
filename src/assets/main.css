@@ -178,3 +178,39 @@
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
+
+/* RESPONSIVE */
+
+/* botones del Calendario en móvil */
+@media (max-width: 1023px) {
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .fc .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+
+  .fc .fc-button {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* en móvil la vista mensual (del calendario de disponibilidad de los guías) muestra el título en dos líneas */
+  @media (max-width: 1023px) {
+    .availability-calendar .fc-daygrid-event .fc-event-title {
+      white-space: normal !important;
+      word-break: break-word !important;
+    }
+  }
+
+  /* en móvil la vista mensual (del calendario de eventos) se muestra la hora en una línea y el título en otra */
+  @media (max-width: 1023px) {
+    .events-calendar .fc-event-main-frame {
+      flex-direction: column !important;
+    }
+  }
+}

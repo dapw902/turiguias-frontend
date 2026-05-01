@@ -119,7 +119,7 @@
       </header>
 
       <!-- vista actual -->
-      <main class="flex-1 overflow-y-auto p-6 bg-base-200">
+      <main class="flex-1 overflow-y-auto p-2 lg:p-6 bg-base-200">
         <RouterView />
       </main>
     </div>
@@ -138,7 +138,8 @@ import { LogOut, ChevronsRight, ChevronsLeft, Eclipse, Sun, UserCircle } from '@
 // para las redirecciones y títulos de las páginas
 import { useRouter, useRoute } from 'vue-router'
 
-const sidebarOpen = ref(true)
+// en móvil el aside empieza cerrado, en desktop abierto
+const sidebarOpen = ref(window.innerWidth >= 1024)
 
 const authStore = useAuthStore()
 
