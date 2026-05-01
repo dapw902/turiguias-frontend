@@ -36,7 +36,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="group in activeGroups" :key="group.group_id">
+              <tr
+                v-for="group in activeGroups"
+                :key="group.group_id"
+                class="cursor-pointer hover:bg-base-200"
+                @click="router.push(`/guide/groups/${group.group_id}/bookings`)"
+              >
                 <td>{{ formatEventTime(group.event_time, group.service_timezone) }}</td>
                 <td class="font-medium">{{ group.service_name }}</td>
                 <td>{{ group.total_pax }} / {{ group.capacity ?? '—' }} pax</td>
@@ -48,10 +53,10 @@
                     {{ group.confirmed ? 'Confirmado' : 'Pendiente' }}
                   </span>
                 </td>
-                <td class="text-right">
+                <td class="text-right lg:block hidden">
                   <RouterLink
                     :to="`/guide/groups/${group.group_id}/bookings`"
-                    class="btn btn-ghost btn-xs"
+                    class="btn btn-ghost"
                   >
                     <Eye :size="14" />
                   </RouterLink>
@@ -83,7 +88,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="group in pastGroups" :key="group.group_id">
+              <tr
+                v-for="group in pastGroups"
+                :key="group.group_id"
+                class="cursor-pointer hover:bg-base-200"
+                @click="router.push(`/guide/groups/${group.group_id}/bookings`)"
+              >
                 <td>{{ formatEventTime(group.event_time, group.service_timezone) }}</td>
                 <td class="font-medium">{{ group.service_name }}</td>
                 <td>{{ group.total_pax }} / {{ group.capacity ?? '—' }} pax</td>
@@ -95,10 +105,10 @@
                     {{ group.confirmed ? 'Confirmado' : 'Pendiente' }}
                   </span>
                 </td>
-                <td class="text-right">
+                <td class="text-right lg:block hidden">
                   <RouterLink
                     :to="`/guide/groups/${group.group_id}/bookings`"
-                    class="btn btn-ghost btn-xs"
+                    class="btn btn-ghost"
                   >
                     <Eye :size="14" />
                   </RouterLink>
@@ -149,7 +159,10 @@ import { DateTime } from 'luxon'
 import { Eye } from '@lucide/vue'
 // para identficar al guía logueado
 import { useAuthStore } from '@/stores/auth'
+// para redirección en vista móvil al listado de las reservas
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const authStore = useAuthStore()
 
 // ESTADO

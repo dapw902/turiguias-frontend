@@ -52,7 +52,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="group in activeGroups" :key="group.group_id">
+              <tr
+                v-for="group in activeGroups"
+                :key="group.group_id"
+                class="cursor-pointer hover:bg-base-200"
+                @click="router.push(`/admin/groups/${group.group_id}/bookings`)"
+              >
                 <td>{{ formatEventTime(group.event_time, group.service_timezone) }}</td>
                 <td class="font-medium">{{ group.service_name }}</td>
                 <td>{{ group.capacity ?? '—' }} pax</td>
@@ -71,10 +76,10 @@
                     Atención
                   </span>
                 </td>
-                <td class="text-right">
+                <td class="text-right lg:block hidden">
                   <RouterLink
                     :to="`/admin/groups/${group.group_id}/bookings`"
-                    class="btn btn-ghost btn-xs"
+                    class="btn btn-ghost"
                   >
                     <Eye :size="14" />
                   </RouterLink>
@@ -107,7 +112,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="group in pastGroups" :key="group.group_id">
+              <tr
+                v-for="group in pastGroups"
+                :key="group.group_id"
+                class="cursor-pointer hover:bg-base-200"
+                @click="router.push(`/admin/groups/${group.group_id}/bookings`)"
+              >
                 <td>{{ formatEventTime(group.event_time, group.service_timezone) }}</td>
                 <td class="font-medium">{{ group.service_name }}</td>
                 <td>{{ group.capacity ?? '—' }} pax</td>
@@ -126,11 +136,8 @@
                     Atención
                   </span>
                 </td>
-                <td class="text-right">
-                  <RouterLink
-                    :to="`/admin/events/${group.event_id}/groups`"
-                    class="btn btn-ghost btn-xs"
-                  >
+                <td class="text-right lg:block hidden">
+                  <RouterLink :to="`/admin/events/${group.event_id}/groups`" class="btn btn-ghost">
                     <Eye :size="14" />
                   </RouterLink>
                 </td>
@@ -172,8 +179,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-// para acceso a los parámetros de la URL
-import { useRoute } from 'vue-router'
+// para acceso a los parámetros de la URL y la redirección al listado de reservas en móvil
+import { useRoute, useRouter } from 'vue-router'
 // importamos las funciones e interfaces necesarias
 import { getGroupsByGuide, type GuideGroup } from '@/api/groups'
 // para obtener el nombre del guía
@@ -184,6 +191,7 @@ import { DateTime } from 'luxon'
 import { Eye, CalendarCheck, ListCheck } from '@lucide/vue'
 
 const route = useRoute()
+const router = useRouter()
 
 // leemos el guideId de la URL (/admin/guides/:guideId/groups)
 const guideId = parseInt(route.params.guideId as string)

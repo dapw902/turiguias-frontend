@@ -370,7 +370,7 @@
             <!-- botón borrar -->
             <div
               v-if="group.confirmed"
-              class="tooltip tooltip-bottom"
+              class="tooltip tooltip-left"
               data-tip="Desmarca 'Confirmado' antes de borrar"
             >
               <button class="btn btn-ghost btn-xs text-base-content/30 cursor-not-allowed">
