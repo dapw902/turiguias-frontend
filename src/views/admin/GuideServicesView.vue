@@ -35,6 +35,12 @@
         </RouterLink>
       </div>
 
+      <!-- error al borrar servicio -->
+      <div v-if="deleteError" class="banner-warning mb-4">
+        <TriangleAlert :size="20" class="text-error flex-shrink-0" />
+        <p class="text-error">{{ deleteError }}</p>
+      </div>
+
       <!-- tabla de servicios asignados -->
       <div class="overflow-x-auto rounded-xl shadow-sm">
         <table class="table bg-base-100">
@@ -161,7 +167,7 @@ import { getServices, type Service } from '@/api/services'
 // para recuperar el listado de usuarios
 import { getUsers } from '@/api/users'
 // iconos
-import { Pencil, Trash2, CalendarCheck, BookOpenCheck } from '@lucide/vue'
+import { Pencil, Trash2, CalendarCheck, BookOpenCheck, TriangleAlert } from '@lucide/vue'
 // para manejo de errores del back
 import { extractError } from '@/utils/errors'
 // store para mensajes de éxito
@@ -169,7 +175,11 @@ import { useSuccessMessages } from '@/stores/successMessages'
 
 const route = useRoute()
 
+// mensaje de confrimación
 const successMessages = useSuccessMessages()
+
+// error específico para el borrado de servicios
+const deleteError = ref('')
 
 // leemos el guideId de la URL (/admin/guides/:guideId/services)
 const guideId = parseInt(route.params.guideId as string)
@@ -299,12 +309,13 @@ const deletingId = ref<number | null>(null)
 
 async function handleDelete(id: number) {
   deletingId.value = id
+  deleteError.value = ''
   try {
     await deleteGuideService(id)
     await loadData()
     successMessages.show('Servicio eliminado correctamente')
-  } catch {
-    error.value = 'Error al borrar el servicio'
+  } catch (e: unknown) {
+    deleteError.value = extractError(e, 'Error al borrar el servicio')
   } finally {
     deletingId.value = null
   }
