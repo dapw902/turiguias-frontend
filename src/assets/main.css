@@ -179,6 +179,41 @@
   margin-bottom: 1rem;
 }
 
+/* IMPRESIÓN */
+@media print {
+  aside,
+  header,
+  .btn,
+  nav {
+    display: none !important;
+  }
+
+  body,
+  #app,
+  .flex.h-screen {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  .bg-base-100,
+  .bg-base-200 {
+    background: white !important;
+    box-shadow: none !important;
+  }
+
+  .max-w-2xl {
+    max-width: 100% !important;
+  }
+}
+
 /* RESPONSIVE */
 
 /* botones del Calendario en móvil */

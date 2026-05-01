@@ -147,6 +147,7 @@ export interface GroupBooking {
 // interfaz para la respuesta del endpoint de reservas de un grupo
 export interface GroupWithBookings {
   group_id: number
+  event_id: number
   confirmed: boolean
   event_time: number
   service_name: string

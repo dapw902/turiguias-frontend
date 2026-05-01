@@ -157,6 +157,8 @@ const pageTitle = computed(() => {
   if (route.path.includes('/events')) return 'Eventos'
   if (route.path.includes('/guides') && route.path.includes('/availability')) return 'Horarios'
   if (route.path.includes('/guides') && route.path.includes('/services')) return 'Servicios'
+  if (route.path.includes('/groups') && route.path.includes('/bookings'))
+    return 'Listado de reservas'
   if (route.path.includes('/guides') && route.path.includes('/groups')) return 'Grupos'
   if (route.path.includes('/guides')) return 'Guías'
   if (route.path.includes('/users')) return 'Usuarios'

@@ -63,6 +63,11 @@ const router = createRouter({
           name: 'admin-account',
           component: () => import('@/views/AccountView.vue'),
         },
+        {
+          path: 'groups/:groupId/bookings',
+          name: 'admin-group-bookings',
+          component: () => import('@/views/GroupBookingsView.vue'),
+        },
       ],
     },
     {
@@ -92,7 +97,7 @@ const router = createRouter({
         {
           path: 'groups/:groupId/bookings',
           name: 'guide-group-bookings',
-          component: () => import('@/views/guide/GroupBookingsView.vue'),
+          component: () => import('@/views/GroupBookingsView.vue'),
         },
         {
           path: 'account',

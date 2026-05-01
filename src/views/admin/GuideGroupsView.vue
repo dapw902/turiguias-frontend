@@ -73,7 +73,7 @@
                 </td>
                 <td class="text-right">
                   <RouterLink
-                    :to="`/admin/events/${group.event_id}/groups`"
+                    :to="`/admin/groups/${group.group_id}/bookings`"
                     class="btn btn-ghost btn-xs"
                   >
                     <Eye :size="14" />

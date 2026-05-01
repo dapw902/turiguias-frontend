@@ -12,16 +12,31 @@
 
     <div v-else-if="groupData">
       <!-- cabecera -->
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-3">
         <div>
-          <h2 class="text-xl font-bold">{{ authStore.user?.name }}</h2>
+          <h2 class="text-xl font-bold">{{ groupData.guide_name ?? authStore.user?.name }}</h2>
           <p class="text-sm text-base-content/60 mt-1">{{ groupData.service_timezone }}</p>
           <p class="text-sm mt-1">
             <span class="font-medium">Grupo {{ groupData.group_id }}</span>
             · {{ formattedEventTime }} · {{ groupData.service_name }} · {{ totalPax }} pax
           </p>
         </div>
-        <button class="btn btn-outline-gradient" @click="router.back()">← Volver</button>
+        <div class="flex flex-col lg:flex-row gap-2">
+          <RouterLink
+            v-if="isAdmin"
+            :to="`/admin/events/${groupData.event_id}/groups`"
+            class="btn btn-gradient w-full lg:w-auto"
+          >
+            Gestionar grupos
+          </RouterLink>
+          <button class="btn btn-gradient w-full lg:w-auto" @click="handlePrint">
+            <Printer :size="16" />
+            Imprimir
+          </button>
+          <button class="btn btn-outline-gradient w-full lg:w-auto" @click="router.back()">
+            ← Volver
+          </button>
+        </div>
       </div>
 
       <!-- listado de reservas -->
@@ -52,6 +67,8 @@ import { DateTime } from 'luxon'
 import { useAuthStore } from '@/stores/auth'
 // template para tarjeta de reserva
 import BookingCard from '@/components/BookingCard.vue'
+// icono
+import { Printer } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -59,6 +76,9 @@ const authStore = useAuthStore()
 
 // leemos el groupId de la URL
 const groupId = parseInt(route.params.groupId as string)
+
+// para detectar si es admin y mostrar el botón de gestionar grupos
+const isAdmin = authStore.isAdmin
 
 // ESTADO
 const groupData = ref<GroupWithBookings | null>(null)
@@ -87,6 +107,11 @@ async function loadData() {
   } finally {
     loading.value = false
   }
+}
+
+// para imprimir o guardar el listado como PDF
+function handlePrint() {
+  window.print()
 }
 
 onMounted(() => {
