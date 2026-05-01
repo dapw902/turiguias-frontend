@@ -41,8 +41,45 @@
         <p class="text-error">{{ deleteError }}</p>
       </div>
 
-      <!-- tabla de servicios asignados -->
-      <div class="overflow-x-auto rounded-xl shadow-sm">
+      <!-- tarjetas de servicio asignados en móvil -->
+      <div class="flex flex-col gap-3 lg:hidden">
+        <div
+          v-for="service in assignedServices"
+          :key="service.id"
+          class="bg-base-100 rounded-xl p-4 shadow-sm"
+        >
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-bold">{{ service.service_name }}</p>
+              <p class="text-sm text-base-content/60">
+                {{ service.turitop_product_id }} · {{ service.capacity }} pax
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-xs" @click="openEditModal(service)">
+                <Pencil :size="14" />
+              </button>
+              <button
+                class="btn btn-ghost btn-xs text-error hover:bg-error/10"
+                :disabled="deletingId === service.id"
+                @click="handleDelete(service.id)"
+              >
+                <span
+                  v-if="deletingId === service.id"
+                  class="loading loading-spinner loading-xs"
+                ></span>
+                <Trash2 v-else :size="14" />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-if="assignedServices.length === 0" class="text-center py-12 text-base-content/40">
+          No hay servicios asignados
+        </div>
+      </div>
+
+      <!-- tabla de servicios asignados en desktop -->
+      <div class="hidden lg:block overflow-x-auto rounded-xl shadow-sm">
         <table class="table bg-base-100">
           <thead>
             <tr>

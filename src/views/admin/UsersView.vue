@@ -12,18 +12,72 @@
 
     <div v-else>
       <!-- cabecera -->
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 gap-3">
         <input
           v-model="search"
           type="text"
           placeholder="Buscar por nombre, email o rol"
-          class="input input-secondary w-80 text-base"
+          class="input input-secondary w-full lg:w-80 text-base"
         />
-        <button class="btn btn-gradient text-white" @click="openCreateModal">Nuevo usuario</button>
+        <button class="btn btn-gradient text-white w-full lg:w-auto" @click="openCreateModal">
+          Nuevo usuario
+        </button>
       </div>
 
-      <!-- tabla de usuarios -->
-      <div class="overflow-x-auto rounded-xl shadow-sm">
+      <!-- Tarjetas de usuarios móvil -->
+      <div class="flex flex-col gap-3 lg:hidden">
+        <div
+          v-for="user in filteredUsers"
+          :key="user.id"
+          :class="{ 'opacity-40': user.id === authStore.user?.id }"
+          class="bg-base-100 rounded-xl p-4 shadow-sm"
+        >
+          <div class="flex justify-between items-start mb-1">
+            <p class="font-bold">{{ user.name }}</p>
+            <span
+              class="badge badge-md text-white"
+              :class="user.role === 'admin' ? 'badge-primary' : 'badge-success'"
+            >
+              {{ user.role }}
+            </span>
+          </div>
+          <p class="text-sm text-base-content/60">{{ user.email }}</p>
+          <p class="text-sm text-base-content/60">{{ user.phone ?? '—' }}</p>
+          <div v-if="user.notes" class="flex items-start gap-1 text-sm text-base-content/60 mt-1">
+            <Info :size="14" class="flex-shrink-0 mt-0.5" />
+            <span>{{ user.notes }}</span>
+          </div>
+          <div class="flex justify-end gap-2 mt-3">
+            <template v-if="user.id === authStore.user?.id">
+              <button class="btn btn-ghost btn-xs text-base-content/30 cursor-not-allowed">
+                <Pencil :size="14" />
+              </button>
+              <button class="btn btn-ghost btn-xs text-base-content/30 cursor-not-allowed">
+                <Trash2 :size="14" />
+              </button>
+            </template>
+            <template v-else>
+              <button class="btn btn-ghost btn-xs" @click="openEditModal(user)">
+                <Pencil :size="14" />
+              </button>
+              <button
+                class="btn btn-ghost btn-xs text-error hover:bg-error/10"
+                :disabled="deletingUserId === user.id"
+                @click="handleDelete(user.id)"
+              >
+                <span
+                  v-if="deletingUserId === user.id"
+                  class="loading loading-spinner loading-xs"
+                ></span>
+                <Trash2 v-else :size="14" />
+              </button>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de usuarios desktop -->
+      <div class="hidden lg:block overflow-x-auto rounded-xl shadow-sm">
         <table class="table bg-base-100">
           <thead>
             <tr>
