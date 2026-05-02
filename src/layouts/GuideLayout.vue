@@ -11,7 +11,7 @@
         <div>
           <div class="flex items-center gap-2">
             <img
-              :src="`${import.meta.env.VITE_UPLOADS_URL}/uploads/photos/logo_prueba.png`"
+              :src="`${uploadsUrl}/uploads/photos/logo_prueba.png`"
               alt="TuriGuías"
               class="h-12 object-contain"
             />
@@ -148,6 +148,9 @@ const themeStore = useThemeStore()
 const router = useRouter()
 
 const route = useRoute()
+
+// URL base para los archivos subidos al servidor
+const uploadsUrl = import.meta.env.VITE_UPLOADS_URL ?? 'http://localhost:3000'
 
 // título dinámico según la ruta activa
 const pageTitle = computed(() => {
