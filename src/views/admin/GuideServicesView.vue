@@ -48,14 +48,14 @@
           :key="service.id"
           class="bg-base-100 rounded-xl p-4 shadow-sm"
         >
-          <div class="flex justify-between items-center">
-            <div>
+          <div class="flex justify-between items-start gap-3">
+            <div class="min-w-0">
               <p class="font-bold">{{ service.service_name }}</p>
               <p class="text-sm text-base-content/60">
                 {{ service.turitop_product_id }} · {{ service.capacity }} pax
               </p>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 flex-shrink-0">
               <button class="btn btn-ghost btn-xs" @click="openEditModal(service)">
                 <Pencil :size="14" />
               </button>
