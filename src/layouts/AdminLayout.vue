@@ -11,7 +11,7 @@
         <div>
           <div class="flex items-center gap-2">
             <img
-              src="http://localhost:3000/uploads/photos/logo_prueba.png"
+              :src="`${import.meta.env.VITE_UPLOADS_URL}/uploads/photos/logo_prueba.png`"
               alt="TuriGuías"
               class="h-12 object-contain"
             />
