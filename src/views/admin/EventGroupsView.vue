@@ -141,7 +141,9 @@
                 >
                   <option value="">Sin asignar</option>
                   <option
-                    v-for="guide in availableGuides"
+                    v-for="guide in availableGuides.filter(
+                      (g) => !groups.some((gr) => gr.user?.id === g.guide_id && gr.id !== group.id),
+                    )"
                     :key="guide.guide_id"
                     :value="guide.guide_id"
                   >
@@ -164,7 +166,9 @@
               >
                 <option value="">Sin asignar</option>
                 <option
-                  v-for="guide in availableGuides"
+                  v-for="guide in availableGuides.filter(
+                    (g) => !groups.some((gr) => gr.user?.id === g.guide_id && gr.id !== group.id),
+                  )"
                   :key="guide.guide_id"
                   :value="guide.guide_id"
                 >
