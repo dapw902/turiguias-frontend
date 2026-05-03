@@ -218,6 +218,8 @@ import { extractError } from '@/utils/errors'
 import { useSuccessMessages } from '@/stores/successMessages'
 // modal para la reconfirmación de borrado de horarios con grupos
 import ForceDeleteAvailabilityModal from '@/components/ForceDeleteAvailabilityModal.vue'
+// para las traducciones al español de FullCalendar
+import esLocale from '@fullcalendar/core/locales/es'
 
 const route = useRoute()
 const successMessages = useSuccessMessages()
@@ -259,7 +261,7 @@ const formLoading = ref(false)
 const calendarOptions = ref<CalendarOptions>({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
-  locale: 'es',
+  locale: esLocale,
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
@@ -328,6 +330,7 @@ function buildCalendarEvents() {
 async function loadData() {
   loading.value = true
   error.value = ''
+  availabilities.value = []
   try {
     const [availabilityData, servicesData, usersData] = await Promise.all([
       getGuideAvailability(guideId),

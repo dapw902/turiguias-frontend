@@ -91,6 +91,8 @@ import { getGuideServices } from '@/api/guide-services'
 // para conversión de fechas
 import { DateTime } from 'luxon'
 import { useAuthStore } from '@/stores/auth'
+// para las traducciones al español de FullCalendar
+import esLocale from '@fullcalendar/core/locales/es'
 
 const authStore = useAuthStore()
 
@@ -115,7 +117,7 @@ const pastAvailabilities = computed(() =>
 const calendarOptions = ref<CalendarOptions>({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
-  locale: 'es',
+  locale: esLocale,
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',

@@ -113,6 +113,8 @@ import { syncEvents } from '@/api/events'
 import { syncBookings } from '@/api/bookings'
 // icono sincronización
 import { RefreshCw } from '@lucide/vue'
+// para las traducciones al español de FullCalendar
+import esLocale from '@fullcalendar/core/locales/es'
 
 const calendarRef = useTemplateRef<InstanceType<typeof FullCalendar>>('calendar')
 
@@ -162,7 +164,7 @@ function handleEventClick(info: EventClickArg) {
 const calendarOptions = ref<CalendarOptions>({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   initialView: window.innerWidth < 1024 ? 'timeGridDay' : 'timeGridWeek',
-  locale: 'es',
+  locale: esLocale,
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',

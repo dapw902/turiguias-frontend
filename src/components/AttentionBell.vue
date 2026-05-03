@@ -72,9 +72,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-// para la navegación
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+// para la navegación y detectar rutas
+import { useRoute, useRouter } from 'vue-router'
 // importamos las funciones e interfaces necesarias
 import { getGroupsWithAttention, type GroupAttention } from '@/api/groups'
 // para decodificar la hora de los eventos
@@ -83,9 +83,18 @@ import { DateTime } from 'luxon'
 import { Bell, X, TriangleAlert } from '@lucide/vue'
 
 const router = useRouter()
+const route = useRoute()
 
 // número máximo de notificaciones visibles
 const MAX_VISIBLE = 5
+
+// recargamos las notificaciones al cambiar de ruta (a reemplazar por websockets futuro)
+watch(
+  () => route.path,
+  () => {
+    loadNotifications()
+  },
+)
 
 // ESTADO
 const open = ref(false)

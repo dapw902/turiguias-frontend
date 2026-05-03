@@ -55,6 +55,8 @@ import { DateTime } from 'luxon'
 import { useAuthStore } from '@/stores/auth'
 // para la navegación
 import { useRouter } from 'vue-router'
+// para las traducciones al español de FullCalendar
+import esLocale from '@fullcalendar/core/locales/es'
 
 const router = useRouter()
 
@@ -86,7 +88,7 @@ function toCalendarEvent(event: Event): EventInput {
 const calendarOptions = ref<CalendarOptions>({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   initialView: window.innerWidth < 1024 ? 'timeGridDay' : 'timeGridWeek',
-  locale: 'es',
+  locale: esLocale,
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
