@@ -10,6 +10,15 @@
       {{ error }}
     </div>
 
+    <!-- aviso de sincronización en curso -->
+    <div v-if="syncing" class="alert alert-warning mb-4 flex items-center gap-2">
+      <span class="loading loading-spinner loading-sm"></span>
+      <span
+        >La sincronización manual puede tardar varios minutos. Por favor, no cierres ni refresques
+        la página.</span
+      >
+    </div>
+
     <!-- calendario (siempre montado) -->
     <div class="bg-base-100 rounded-xl p-2 lg:p-4 shadow-sm relative events-calendar">
       <!-- tabs de timezone y botón de sincronización -->
