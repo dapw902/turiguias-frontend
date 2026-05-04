@@ -63,8 +63,9 @@
             <!-- header del grupo -->
             <div class="flex flex-col mb-3 gap-2">
               <!-- fila superior: título + checkbox + borrar -->
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between gap-2">
                 <p class="font-bold text-sm">Grupo {{ group.id }}</p>
+                <span class="badge badge-ghost text-xs">{{ paxByGroup[group.id] ?? 0 }} pax</span>
                 <div class="flex items-center gap-2">
                   <!-- checkbox confirmed: bloqueado si needs_attention o sin guía asignado -->
                   <label
@@ -228,7 +229,10 @@
 
           <!-- columna de reservas sueltas: siempre visible para poder soltar aquí -->
           <div class="bg-base-100 rounded-xl p-4 shadow-sm min-w-72 w-72 flex-shrink-0">
-            <p class="font-bold text-sm mb-3">Sin grupo ({{ ungroupedBookings.length }})</p>
+            <div class="flex items-center justify-between w-full mb-3">
+              <p class="font-bold text-sm">Sin grupo ({{ ungroupedBookings.length }})</p>
+              <span class="badge badge-ghost text-xs">{{ ungroupedPax }} pax</span>
+            </div>
             <draggable
               :list="ungroupedBookings"
               group="bookings"
@@ -259,7 +263,10 @@
       <div v-else class="flex flex-col gap-4">
         <!-- reservas sin grupo -->
         <div class="bg-base-100 rounded-xl p-4 shadow-sm">
-          <p class="font-bold text-sm mb-3">Sin grupo ({{ ungroupedBookings.length }})</p>
+          <div class="flex items-center justify-between w-full mb-3">
+            <p class="font-bold text-sm">Sin grupo ({{ ungroupedBookings.length }})</p>
+            <span class="badge badge-ghost text-xs">{{ ungroupedPax }} pax</span>
+          </div>
           <div class="flex flex-col gap-2">
             <div v-for="booking in ungroupedBookings" :key="booking.id" class="flex flex-col gap-2">
               <BookingCard :booking="booking" />
@@ -289,9 +296,12 @@
           class="bg-base-100 rounded-xl p-4 shadow-sm border border-transparent"
           :class="{ 'border-error': group.needs_attention }"
         >
-          <p class="font-bold text-sm mb-2">
-            Grupo {{ group.id }} — {{ group.user?.name ?? 'Sin guía' }}
-          </p>
+          <div class="flex items-center justify-between w-full mb-2">
+            <p class="font-bold text-sm">
+              Grupo {{ group.id }} — {{ group.user?.name ?? 'Sin guía' }}
+            </p>
+            <span class="badge badge-ghost text-xs">{{ paxByGroup[group.id] ?? 0 }} pax</span>
+          </div>
           <!-- selector de guía en móvil -->
           <div
             v-if="group.confirmed"
@@ -507,6 +517,18 @@ const totalPax = computed(() =>
 const ungroupedBookings = ref<Booking[]>([])
 // reservas agrupadas por group.id — ref para que el Draggable pueda modificarlo
 const bookingsByGroup = ref<Record<number, Booking[]>>({})
+
+// pax total por grupo (para mostrar en la cabecera de cada tarjeta)
+const paxByGroup = computed(() => {
+  const map: Record<number, number> = {}
+  for (const group of groups.value) {
+    map[group.id] = (bookingsByGroup.value[group.id] ?? []).reduce((sum, b) => sum + b.pax, 0)
+  }
+  return map
+})
+
+// pax total de las reservas sin grupo
+const ungroupedPax = computed(() => ungroupedBookings.value.reduce((sum, b) => sum + b.pax, 0))
 
 // HELPERS
 // para formatear el título del evento: "dd/MM/yyyy - HH:mm - Nombre servicio"

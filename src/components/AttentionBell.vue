@@ -15,7 +15,7 @@
     <!-- panel de notificaciones -->
     <div
       v-if="open"
-      class="absolute right-0 top-10 w-80 bg-base-100 rounded-xl shadow-lg border border-base-300 z-50"
+      class="fixed right-2 top-16 w-80 max-w-[calc(100vw-1rem)] bg-base-100 rounded-xl shadow-lg border border-base-300 z-50"
     >
       <!-- cabecera -->
       <div class="px-4 py-3 border-b border-base-300 flex items-center justify-between">

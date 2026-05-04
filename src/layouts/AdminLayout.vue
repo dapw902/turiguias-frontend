@@ -99,7 +99,7 @@
         <h2 class="text-3xl font-medium">{{ pageTitle }}</h2>
 
         <!-- iconos mini-menu  -->
-        <div class="flex items-center bg-base-100 rounded-full px-3 py-1 gap-2 shadow-sm">
+        <div class="relative flex items-center bg-base-100 rounded-full px-3 py-1 gap-2 shadow-sm">
           <!-- campana de alertas -->
           <AttentionBell />
           <!-- mi cuenta -->
