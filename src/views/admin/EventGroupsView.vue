@@ -65,7 +65,9 @@
               <!-- fila superior: título + checkbox + borrar -->
               <div class="flex items-center justify-between gap-2">
                 <p class="font-bold text-sm">Grupo {{ group.id }}</p>
-                <span class="badge badge-ghost text-xs">{{ paxByGroup[group.id] ?? 0 }} pax</span>
+                <span class="badge badge-ghost text-xs whitespace-nowrap"
+                  >{{ paxByGroup[group.id] ?? 0 }} pax</span
+                >
                 <div class="flex items-center gap-2">
                   <!-- checkbox confirmed: bloqueado si needs_attention o sin guía asignado -->
                   <label
