@@ -64,7 +64,7 @@
             <div class="flex flex-col mb-3 gap-2">
               <!-- fila superior: título + checkbox + borrar -->
               <div class="flex items-center justify-between gap-2">
-                <p class="font-bold text-sm">Grupo {{ group.id }}</p>
+                <p class="font-bold text-sm whitespace-nowrap">Grupo {{ group.id }}</p>
                 <span class="badge badge-ghost text-xs whitespace-nowrap"
                   >{{ paxByGroup[group.id] ?? 0 }} pax</span
                 >
