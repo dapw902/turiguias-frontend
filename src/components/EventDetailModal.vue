@@ -29,7 +29,9 @@
         <!-- conteo de reservas -->
         <div class="bg-base-200 rounded-lg p-3">
           <p class="text-xs text-base-content/60">Reservas</p>
-          <p class="text-xl font-bold">{{ bookings.length }}</p>
+          <p class="text-xl font-bold">
+            {{ bookings.filter((b) => b.status !== 'deleted').length }}
+          </p>
         </div>
         <!-- conteo de grupos -->
         <div class="bg-base-200 rounded-lg p-3 mb-4">
